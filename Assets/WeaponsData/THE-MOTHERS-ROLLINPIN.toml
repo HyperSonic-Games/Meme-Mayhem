@@ -1,0 +1,5 @@
+Name = "THE MOTHERS ROLLING PIN"
+MagSize = 1
+BaseShotDamage = 200
+HeadShotDamage = 0 # no headshots
+Type = "OneUse" # once the mag depletes remove the weapon
