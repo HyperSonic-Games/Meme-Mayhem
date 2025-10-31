@@ -8,13 +8,7 @@ This is the new and improved version of Meme Mayhem, now being rebuilt in Odin a
 → Yes! Mod support is planned from day one, powered by the shared Engine library.
 
 * How will the game improve?
-→ With Odin’s compiled performance and Raylib’s lightweight rendering, we can now support:
-
-Much larger worlds
-
-Even more chaotic gameplay
-
-And way more than 15 players at once
+→ With Odin’s compiled performance and Raylib’s lightweight rendering, we can now support Much larger worlds, even more **chaotic** gameplay and way **more than 15 players at once**
 
 * Why remake it?
 → The old Python version became too big to maintain efficiently. This rewrite ensures cleaner code, faster updates, and long-term stability.
