@@ -1,5 +1,5 @@
 Name = "moosey's antlers" 
 MagSize = 1
 BaseShotDamage = 25
-HeadshotDamage = 35
+HeadShotDamage = 35
 type = "Melee"
