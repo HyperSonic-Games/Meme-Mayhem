@@ -1,0 +1,62 @@
+[
+  {
+    "Name": "Автомат Калашникова",
+    "ReloadTime": 5,
+    "MagSize": 30,
+    "BaseShotDamage": 5,
+    "HeadShotDamage": 15,
+    "Range": 800,
+    "Type": "AUTOMATIC",
+    "IS_ONE_USE": false
+  },
+  {
+    "Name": "Chewiecatt's machinegun",
+    "ReloadTime": 6.5,
+    "MagSize": 100,
+    "BaseShotDamage": 3,
+    "HeadShotDamage": 13,
+    "Range": 800,
+    "Type": "AUTOMATIC",
+    "IS_ONE_USE": false
+  },
+  {
+    "Name": "moosey's antlers",
+    "ReloadTime": 5,
+    "MagSize": -1,
+    "BaseShotDamage": 25,
+    "HeadShotDamage": 35,
+    "Range": 800,
+    "Type": "MELEE",
+    "IS_ONE_USE": false
+  },
+  {
+    "Name": "SUB Machine Gun",
+    "ReloadTime": 5,
+    "MagSize": 35,
+    "BaseShotDamage": 5,
+    "HeadShotDamage": -10,
+    "Range": 800,
+    "Type": "AUTOMATIC",
+    "IS_ONE_USE": false
+  },
+  {
+    "Name": "THE FATHER'S BELT",
+    "ReloadTime": 5,
+    "MagSize": 1,
+    "BaseShotDamage": 200,
+    "HeadShotDamage": 0,
+    "Range": 800,
+    "Type": "MELEE",
+    "IS_ONE_USE": true
+  },
+  {
+    "Name": "THE MOTHERS ROLLING PIN",
+    "ReloadTime": 5,
+    "MagSize": 1,
+    "BaseShotDamage": 200,
+    "HeadShotDamage": 0,
+    "Range": 800,
+    "Type": "MELEE",
+    "IS_ONE_USE": true
+  }
+]

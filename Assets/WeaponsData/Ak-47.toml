@@ -1,7 +1,0 @@
-Name = "Автомат Калашникова"     # Display name
-ReloadTime = 5                   # Time to reload seconds
-MagSize = 30                     # Bullets per magazine
-BaseShotDamage = 5               # Body shot damage
-HeadShotDamage = 15              # Headshot damage
-Range = 800                      # Effective range in pixels, apply damage falloff after this range
-Type = "Automatic"

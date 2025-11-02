@@ -1,5 +1,0 @@
-Name = "moosey's antlers" 
-MagSize = 1
-BaseShotDamage = 25
-HeadShotDamage = 35
-type = "Melee"
