@@ -1,7 +1,7 @@
 package Engine
 
 import rl "vendor:raylib"
-Vec2 :: [2]f64
+Vec2 :: [2]f32
 
 WeaponType :: enum {
     AUTOMATIC,
@@ -9,10 +9,23 @@ WeaponType :: enum {
     MELEE,
 }
 
+WeaponData :: struct {
+    name: string,
+    type: WeaponType,
+    reload_time: i64,
+    ammo: u64,
+    base_damage: i64,
+    head_shot_damage: i64,
+    range: u16,
+    is_one_use: bool,
+} 
+
+
 Entity :: struct {
     is_player: bool,
     pos: Vec2,
     rot: f32,
+    texture: rl.Texture
 
 }
 
@@ -25,14 +38,14 @@ MapTile :: struct {
     type: MapTileType,
     grid_pos_x: u32,
     grid_pos_y: u32,
-    texture: ^rl.Image
+    texture: rl.Texture
 }
 
 
 MapObject :: struct {
     pos: Vec2,
     rot: f32,
-    textures: ^rl.Image, // NOTE: for animations replace the image then set it back
+    textures: rl.Texture, // NOTE: for animations replace the image then set it back
 }
 
 Map :: struct {
