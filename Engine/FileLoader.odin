@@ -1,10 +1,12 @@
 package Engine
 
+import "core:math/rand"
 import "core:os"
 import "core:strings"
 import "core:path/filepath"
 import rl "vendor:raylib"
 import "core:encoding/json"
+
 
 
 // Helper to convert string to enum
@@ -34,6 +36,7 @@ LoadWeapons :: proc() -> []WeaponData {
             file_path
         )
     }
+    free_all(context.temp_allocator)
     val, err := json.parse(data)
     if err != json.Error.None {
         Critical("MEME_MAYHEM.FILE_LOADER.LOAD_WEAPONS", "Failed to parse JSON")
