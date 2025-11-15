@@ -5,7 +5,7 @@ This is the new and improved version of Meme Mayhem, now being rebuilt in Odin a
 # FAQ
 
 * Will this have mod support?
-→ Yes! Mod support is planned from day one, powered by the shared Engine library.
+→ Yes! Mod support is planned from day one, the the `Engine` folder holds shared code for everything so to add your own stuff just edit the engine code
 
 * How will the game improve?
 → With Odin’s compiled performance and Raylib’s lightweight rendering, we can now support Much larger worlds, even more **chaotic** gameplay and way **more than 15 players at once**
