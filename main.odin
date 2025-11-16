@@ -5,5 +5,5 @@ import "Engine"
 
 
 main :: proc() {
-    
+    fmt.printf("Weapon Data: %v", Engine.LoadWeapons())
 }

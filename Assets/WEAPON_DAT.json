@@ -1,7 +1,7 @@
 [
   {
     "NAME": "Автомат Калашникова",
-    "RELOAD_TIME": 5,
+    "RELOAD_TIME": 5.0,
     "AMMO": 30,
     "BASE_DAMAGE": 5,
     "HEAD_SHOT_DAMAGE": 15,
@@ -21,7 +21,7 @@
   },
   {
     "NAME": "moosey's antlers",
-    "RELOAD_TIME": 5,
+    "RELOAD_TIME": 5.0,
     "AMMO": -1,
     "BASE_DAMAGE": 25,
     "HEAD_SHOT_DAMAGE": 35,
@@ -31,7 +31,7 @@
   },
   {
     "NAME": "SUB Machine Gun",
-    "RELOAD_TIME": 5,
+    "RELOAD_TIME": 5.0,
     "AMMO": 35,
     "BASE_DAMAGE": 5,
     "HEAD_SHOT_DAMAGE": -10,
@@ -41,7 +41,7 @@
   },
   {
     "NAME": "THE FATHER'S BELT",
-    "RELOAD_TIME": 5,
+    "RELOAD_TIME": 5.0,
     "AMMO": 1,
     "BASE_DAMAGE": 200,
     "HEAD_SHOT_DAMAGE": 0,
@@ -51,7 +51,7 @@
   },
   {
     "NAME": "THE MOTHERS ROLLING PIN",
-    "RELOAD_TIME": 5,
+    "RELOAD_TIME": 5.0,
     "AMMO": 1,
     "BASE_DAMAGE": 200,
     "HEAD_SHOT_DAMAGE": 0,

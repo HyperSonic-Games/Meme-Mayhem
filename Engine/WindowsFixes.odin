@@ -9,10 +9,10 @@ import "core:sys/windows"
 NvOptimusEnablement: u32 = 1
 
 @(export, rodata)
-AmdPowerXpressRequestHighPerformance: u32 = 1
+AmdPowerXpressRequestHighPerformance: u32 = 0x00000001
 
 // Initialize Windows-specific behavior for raylib games
-@init
+@(init, private)
 FixWindowsGameEnvironment :: proc() {
     // UTF-8 + ANSI color support (for console debug output)
     windows.SetConsoleOutputCP(.UTF8)
@@ -36,7 +36,7 @@ FixWindowsGameEnvironment :: proc() {
     windows.SetThreadPriority(curr_thread, windows.THREAD_PRIORITY_ABOVE_NORMAL)
 }
 
-// Optional: restore defaults on shutdown
+@(fini, private)
 FixWindowsCleanup :: proc() {
     windows.timeEndPeriod(1)
 

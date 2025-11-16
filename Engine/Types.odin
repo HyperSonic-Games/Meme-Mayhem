@@ -1,6 +1,7 @@
 package Engine
 
 import rl "vendor:raylib"
+
 Vec2 :: [2]f32
 
 WeaponType :: enum {
@@ -12,11 +13,11 @@ WeaponType :: enum {
 WeaponData :: struct {
     name: string,
     type: WeaponType,
-    reload_time: i64,
-    ammo: u64,
+    reload_time: f64,
+    ammo: i64,
     base_damage: i64,
     head_shot_damage: i64,
-    range: u16,
+    range: i64,
     is_one_use: bool,
 } 
 
