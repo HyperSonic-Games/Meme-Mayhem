@@ -10,6 +10,7 @@ WeaponType :: enum {
     MELEE,
 }
 
+
 WeaponData :: struct {
     name: string,
     type: WeaponType,
@@ -19,6 +20,9 @@ WeaponData :: struct {
     head_shot_damage: i64,
     range: i64,
     is_one_use: bool,
+    rarity_percentage: u64,
+    _image: rl.Texture2D,
+    _sound: rl.AudioStream
 } 
 
 
