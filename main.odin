@@ -4,7 +4,8 @@ import "Magma/2D/Renderer"
 import "Magma/2D/EventSys"
 import "Magma/2D/Physics"
 import "Magma/2D/Audio"
-
+import "Magma/Types"
+import "Magma/Util"
 
 main :: proc() {
     ctx := Renderer.Init("MEME_MAYHEM", "Meme Mayhem", 800, 500, .OPEN_GL, ODIN_DEBUG)
