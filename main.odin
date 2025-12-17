@@ -17,10 +17,15 @@ main :: proc() {
     for running {
         EventSys.HandleEvents(mouse, keyboard, win_state)
         Renderer.FPSLimiter(120)
-
         Renderer.Update(&ctx)
+
+        if win_state.should_quit {
+            running = false
+        }
 
         EventSys.ResetWindowFlags(win_state)
     }
+
+    Renderer.Shutdown(ctx)
 
 }
