@@ -1,1 +1,6 @@
 package Game
+
+
+WeaponData :: struct {
+    
+}
