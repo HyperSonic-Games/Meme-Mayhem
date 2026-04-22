@@ -58,7 +58,9 @@ Warranty:
 */
 package Net
 
-import "core:reflect"
+import "core:strings"
+import "core:slice"
+
 
 Buffer :: [dynamic]u8
 
@@ -152,6 +154,165 @@ BufferWriteBool :: proc(data: b8, buffer: ^Buffer) {
     append(buffer, dat)
 }
 
+/*
+NOTE(A-Boring-Square):
+strings are a pain in the ass
+as we encode them as `[string data][len]`
+and decode them as `[len][string data]`
+*/
 BufferWriteString :: proc(data: string, buffer: ^Buffer) {
+    bytes := transmute([]u8)data
+
+    // write data 
+    // NOTE: this is reversed
+    for b in bytes {
+        append(buffer, b)
+    }
+
+    // then write the length at the end
+    BufferWriteu64(cast(u64le)len(bytes), buffer)
+}
+
+BufferWrite :: proc {
+    BufferWritei8,
+    BufferWriteu8,
+    BufferWritei16,
+    BufferWriteu16,
+    BufferWritei32,
+    BufferWriteu32,
+    BufferWritei64,
+    BufferWriteu64,
+    BufferWritef32,
+    BufferWritef64,
+    BufferWriteBool,
+    BufferWriteString
+}
+
+
+BufferReadi8 :: proc(buffer: ^Buffer) -> i8 {
+    return cast(i8)pop(buffer)
+}
+
+BufferReadu8 :: proc(buffer: ^Buffer) -> u8 {
+    return pop(buffer)
+}
+
+BufferReadi16 :: proc(buffer: ^Buffer) -> i16le {
+    dat: [2]u8
+
+    dat[1] = pop(buffer)
+    dat[0] = pop(buffer)
+
+    return transmute(i16le)dat
+}
+
+BufferReadu16 :: proc(buffer: ^Buffer) -> u16le {
+    dat: [2]u8
     
+    dat[1] = pop(buffer)
+    dat[0] = pop(buffer)
+    
+    return transmute(u16le)dat
+}
+
+BufferReadi32 :: proc(buffer: ^Buffer) -> i32le {
+    dat: [4]u8
+
+    dat[3] = pop(buffer)
+    dat[2] = pop(buffer)
+    dat[1] = pop(buffer)
+    dat[0] = pop(buffer)
+
+    return transmute(i32le)dat
+}
+
+BufferReadu32 :: proc(buffer: ^Buffer) -> u32le {
+    dat: [4]u8
+
+    dat[3] = pop(buffer)
+    dat[2] = pop(buffer)
+    dat[1] = pop(buffer)
+    dat[0] = pop(buffer)
+
+    return transmute(u32le)dat
+}
+
+BufferReadi64 :: proc(buffer: ^Buffer) -> i64le {
+    dat: [8]u8
+
+    dat[7] = pop(buffer)
+    dat[6] = pop(buffer)
+    dat[5] = pop(buffer)
+    dat[4] = pop(buffer)
+    dat[3] = pop(buffer)
+    dat[2] = pop(buffer)
+    dat[1] = pop(buffer)
+    dat[0] = pop(buffer)
+
+    return transmute(i64le)dat
+}
+
+BufferReadu64 :: proc(buffer: ^Buffer) -> u64le {
+    dat: [8]u8
+
+    dat[7] = pop(buffer)
+    dat[6] = pop(buffer)
+    dat[5] = pop(buffer)
+    dat[4] = pop(buffer)
+    dat[3] = pop(buffer)
+    dat[2] = pop(buffer)
+    dat[1] = pop(buffer)
+    dat[0] = pop(buffer)
+
+    return transmute(u64le)dat
+}
+
+BufferReadf32 :: proc(buffer: ^Buffer) -> f32le {
+    dat: [4]u8
+
+    dat[3] = pop(buffer)
+    dat[2] = pop(buffer)
+    dat[1] = pop(buffer)
+    dat[0] = pop(buffer)
+    
+    return transmute(f32le)dat
+}
+
+BufferReadf64 :: proc(buffer: ^Buffer) -> f64le {
+    dat: [8]u8
+
+    dat[7] = pop(buffer)
+    dat[6] = pop(buffer)
+    dat[5] = pop(buffer)
+    dat[4] = pop(buffer)
+    dat[3] = pop(buffer)
+    dat[2] = pop(buffer)
+    dat[1] = pop(buffer)
+    dat[0] = pop(buffer)
+
+    return transmute(f64le)dat
+}
+
+BufferReadBool :: proc(buffer: ^Buffer) -> b8 {
+    return transmute(b8)pop(buffer)
+}
+
+/*
+NOTE(A-Boring-Square):
+this keeps any data already in the `string_buffer` intact
+why you would want this idk but i bet some random moder
+is going to be like OMG they have this built in
+*/
+BufferReadString :: proc(buffer: ^Buffer, string_buffer: ^[dynamic]u8, allocator := context.allocator) -> string {
+    length := int(BufferReadu64(buffer))
+
+    start := len(string_buffer)
+
+    for i := 0; i < length; i += 1 {
+        append(string_buffer, pop(buffer))
+    }
+
+    slice.reverse(string_buffer[start:start+length])
+
+    return strings.clone(cast(string)string_buffer[start:start+length], allocator)
 }
