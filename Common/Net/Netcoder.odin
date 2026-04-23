@@ -58,6 +58,7 @@ Warranty:
 */
 package Net
 
+import "base:intrinsics"
 import "core:mem"
 import "core:reflect"
 import "core:strings"
@@ -175,6 +176,13 @@ BufferWriteString :: proc(data: string, buffer: ^Buffer) {
     BufferWriteu64(cast(u64le)len(bytes), buffer)
 }
 
+BufferWriteBytes :: proc(data: []u8, buffer: ^Buffer) {
+    for b in data {
+        BufferWriteu8(b, buffer)
+    }
+}
+
+
 BufferWrite :: proc {
     BufferWritei8,
     BufferWriteu8,
@@ -187,7 +195,8 @@ BufferWrite :: proc {
     BufferWritef32,
     BufferWritef64,
     BufferWriteBool,
-    BufferWriteString
+    BufferWriteString,
+    BufferWriteBytes,
 }
 
 
@@ -318,80 +327,211 @@ BufferReadString :: proc(buffer: ^Buffer, string_buffer: ^[dynamic]u8, allocator
 
     return strings.clone(cast(string)string_buffer[start:start+length], allocator)
 }
+// The returned buffer is the same length as you passed in
+BufferReadBytes :: proc(length: int, buffer: ^Buffer, allocator := context.allocator) -> [^]u8 {
+    data := make([^]u8, length, allocator)
 
-BufferWriteStruct :: proc(s: any, buffer: ^Buffer) {
-    info := reflect.type_info_base(type_info_of(s.id))
-    struct_ptr := cast(^byte)s.data
+    for i in 0..<length {
+        data[length - 1 - i] = BufferReadu8(buffer)
+    }
 
-    if s_info, ok := info.variant.(reflect.Type_Info_Struct); ok {
-        // Multi-pointers ([^]T) require manual indexing up to field_count
-        for i in 0..<s_info.field_count {
-            f_type := s_info.types[i]
-            f_offset := s_info.offsets[i]
-            f_data := mem.ptr_offset(struct_ptr, f_offset)
+    return data
+}
+/*
+MODDERS INFO - NETWORK SERIALIZATION RULES
 
-            field_any := any{f_data, f_type.id}
+This file defines the binary encoding/decoding rules for ALL messages in ANY_MESSAGE.
 
-            switch v in field_any {
-            case i8:      BufferWrite(v, buffer)
-            case u8:      BufferWrite(v, buffer)
-            case i16:     BufferWrite(cast(i16le)v, buffer)
-            case u16:     BufferWrite(cast(u16le)v, buffer)
-            case i32:     BufferWrite(cast(i32le)v, buffer)
-            case u32:     BufferWrite(cast(u32le)v, buffer)
-            case i64:     BufferWrite(cast(i64le)v, buffer)
-            case u64:     BufferWrite(cast(u64le)v, buffer)
-            case f32:     BufferWrite(cast(f32le)v, buffer)
-            case f64:     BufferWrite(cast(f64le)v, buffer)
-            case b8:      BufferWrite(v, buffer)
-            case bool:    BufferWrite(cast(b8)v, buffer)
-            case string:  BufferWrite(v, buffer)
-            case:
-                // Recursive check for nested structs
-                base := reflect.type_info_base(f_type)
-                if _, is_struct := base.variant.(reflect.Type_Info_Struct); is_struct {
-                    BufferWriteStruct(field_any, buffer)
-                }
-            }
-        }
+IMPORTANT: This system uses a FILO (stack-based) buffer.
+
+--------------------------------------------------------------------
+1. BUFFER MODEL (CRITICAL)
+--------------------------------------------------------------------
+- BufferWrite() PUSHES values onto a stack
+- BufferRead*() POPS values from a stack
+- There is NO streaming / FIFO behavior
+- Everything is stack ordered
+
+This means:
+  LAST WRITTEN = FIRST READ
+
+--------------------------------------------------------------------
+2. NO MESSAGE TAGS
+--------------------------------------------------------------------
+- There is NO runtime tag or discriminator in the buffer
+- The message type is known externally by the caller
+- Encode/Decode functions are type-specific only
+- ANY_MESSAGE is only a container type, not self-describing
+
+--------------------------------------------------------------------
+3. FIELD ORDER RULES (MOST IMPORTANT RULE)
+--------------------------------------------------------------------
+For every struct:
+
+ENCODE RULE:
+  - Write fields in REVERSE order of struct definition
+  - Because buffer is FILO (stack push)
+
+DECODE RULE:
+  - Read fields in REVERSE order of encoding
+  - Because buffer is FILO (stack pop)
+
+If field order is wrong → data is silently corrupted.
+
+--------------------------------------------------------------------
+4. VARIABLE LENGTH DATA (LEN + DATA PAIR RULE)
+--------------------------------------------------------------------
+
+ALL dynamic data MUST follow this strict rule:
+
+ENCODE:
+  1. Write DATA first
+  2. Write LENGTH second
+
+DECODE:
+  1. Read LENGTH first (it was pushed last)
+  2. Allocate memory using LENGTH
+  3. Read DATA second
+
+Example:
+
+ENCODE:
+  BufferWrite(data)
+  BufferWrite(len)
+
+DECODE:
+  len  = BufferRead()
+  data = BufferReadBytes(len)
+
+--------------------------------------------------------------------
+5. FIXED ARRAYS (e.g UUID)
+--------------------------------------------------------------------
+- Must be written element-by-element
+- Must be read in reverse element order due to stack behavior
+
+Example:
+ENCODE:
+  for i in data:
+      BufferWrite(i)
+
+DECODE:
+  for i from end -> start:
+      BufferRead()
+
+--------------------------------------------------------------------
+6. HOW TO ADD A NEW MESSAGE TYPE
+--------------------------------------------------------------------
+
+STEP 1: Define struct
+
+STEP 2: Create encoder
+  BufferEncode_<NAME>
+
+  RULES:
+    - Write fields in REVERSE struct order
+    - Apply LEN/DATA rule for slices/strings
+    - No assumptions about FIFO streams
+
+STEP 3: Create decoder
+  BufferDecode_<NAME>
+
+  RULES:
+    - Read fields in reverse order of encoder
+    - Allocate variable-length fields using popped length
+    - Reverse-read fixed arrays
+
+STEP 4: Register usage manually in network logic
+
+--------------------------------------------------------------------
+7. SAFETY MODEL
+--------------------------------------------------------------------
+- No bounds checking is performed
+- No validation of buffer contents exists
+- Corrupt input WILL desync decoding
+- Encode/Decode symmetry is entirely manual responsibility
+
+--------------------------------------------------------------------
+8. FORBIDDEN PRACTICES
+--------------------------------------------------------------------
+- Do NOT introduce implicit tags into buffer
+- Do NOT reorder existing struct fields
+- Do NOT assume FIFO serialization semantics
+- Do NOT use reflection for serialization
+- Do NOT mix streaming assumptions with stack buffer
+- Do NOT forget to free the multi pointer inside the struct before freeing the struct (if used)
+
+--------------------------------------------------------------------
+9. DESIGN INTENT
+--------------------------------------------------------------------
+This system is intentionally deterministic and low-level:
+- Zero metadata overhead
+- Zero runtime dispatch
+- Maximum performance via stack operations
+- Strict symmetry requirement between encode/decode
+
+Any deviation breaks protocol correctness.
+*/
+
+@(private)
+BufferEncode_CLIENT_HELLO_MSG :: proc(msg: CLIENT_HELLO_MSG, buffer: ^Buffer) {
+    for i in msg.player_id {
+        BufferWrite(i, buffer)
+    }
+
+    /* NOTE(A-Boring-Square):
+    DO NOT CHANGE THIS ORDER
+    WE NEED IT SO THE DECODER CAN ALLOCATE SPACE
+    */
+    BufferWrite(slice.from_ptr(msg.player_name, cast(int)msg.player_name_len), buffer)
+    BufferWrite(msg.player_name_len, buffer)
+
+
+    BufferWrite(msg.protocol_version, buffer)
+}
+
+@(private)
+BufferDecode_CLIENT_HELLO_MSG :: proc(
+    buffer: ^Buffer,
+    allocator := context.allocator
+) -> ^CLIENT_HELLO_MSG {
+
+    msg := new(CLIENT_HELLO_MSG, allocator)
+
+    // 1. last pushed
+    msg.protocol_version = BufferReadu16(buffer)
+
+    // 2. length
+    msg.player_name_len = BufferReadu16(buffer)
+
+    // 3. data (must allocate)
+    name_bytes := BufferReadBytes(int(msg.player_name_len), buffer, allocator)
+    msg.player_name = raw_data(name_bytes)
+
+    // 4. UUID (was pushed first → read last, but per-byte reversed)
+    for i := len(msg.player_id) - 1; i >= 0; i -= 1 {
+        msg.player_id[i] = BufferReadu8(buffer)
+    }
+
+    return msg
+}
+
+
+EncodeMessage :: proc(msg: ANY_MESSAGE, buffer: ^Buffer) {
+    switch v in msg {
+        case CLIENT_HELLO_MSG:
+            BufferEncode_CLIENT_HELLO_MSG(v, buffer)
+        case SERVER_HELLO_MSG:
     }
 }
 
-BufferReadStruct :: proc(s: any, buffer: ^Buffer, string_buffer: ^[dynamic]u8) {
-    info := reflect.type_info_base(type_info_of(s.id))
-    struct_ptr := cast(^u8)s.data
 
-    if s_info, ok := info.variant.(reflect.Type_Info_Struct); ok {
-        for i in 0..<s_info.field_count {
-            f_type := s_info.types[i]
-            f_offset := s_info.offsets[i]
-            f_data := mem.ptr_offset(struct_ptr, f_offset)
-
-            #partial switch variant in reflect.type_info_base(f_type).variant {
-            case reflect.Type_Info_Integer:
-                switch f_type.id {
-                case i8:   (^i8)(f_data)^    = BufferReadi8(buffer)
-                case u8:   (^u8)(f_data)^    = BufferReadu8(buffer)
-                case i16:  (^i16le)(f_data)^ = BufferReadi16(buffer)
-                case u16:  (^u16le)(f_data)^ = BufferReadu16(buffer)
-                case i32:  (^i32le)(f_data)^ = BufferReadi32(buffer)
-                case u32:  (^u32le)(f_data)^ = BufferReadu32(buffer)
-                case i64:  (^i64le)(f_data)^ = BufferReadi64(buffer)
-                case u64:  (^u64le)(f_data)^ = BufferReadu64(buffer)
-                }
-            case reflect.Type_Info_Float:
-                switch f_type.id {
-                case f32: (^f32le)(f_data)^ = BufferReadf32(buffer)
-                case f64: (^f64le)(f_data)^ = BufferReadf64(buffer)
-                }
-            case reflect.Type_Info_Boolean:
-                (^b8)(f_data)^ = BufferReadBool(buffer)
-            case reflect.Type_Info_String:
-                (^string)(f_data)^ = BufferReadString(buffer, string_buffer)
-            case reflect.Type_Info_Struct:
-                nested_any := any{f_data, f_type.id}
-                BufferReadStruct(nested_any, buffer, string_buffer)
-            }
-        }
-    }
+/*
+NOTE(A-Boring-Square):
+it is a good idea to pass a nil pointer to `msg` as
+this function will use the allocator provided to set it up with the correct size
+and values
+example
+`msg: ^CLIENT_HELLO_MSG = nil`
+*/
+DecodeMessage :: proc(msg: ^ANY_MESSAGE, buffer: ^Buffer, allocator := context.allocator) {
 }

@@ -64,6 +64,7 @@ import "base:runtime"
 import "core:encoding/uuid"
 import "../../Magma/Types"
 
+
 CLIENT_HELLO_MSG :: struct {
     player_id: uuid.Identifier,
 
@@ -110,7 +111,8 @@ SERVER_EVENT_SPAWN_MSG :: struct {
 
 /*
 NOTE(A-Boring-Square):
-we just give data the Client will figure out how to remove the object/player and how to clean up
+we just give data.
+The Client will figure out how to remove the object/player and how to clean up
 */
 SERVER_EVENT_DESPAWN_MSG :: struct {
     is_player: bool, // If false it is an object like health, ammo or guns
@@ -203,6 +205,13 @@ SERVER_ERROR_MSG :: struct {
     reason_len: u16le,
 }
 
+/*
+FOR MODDERS:
+
+when adding a new packet make sure to add it to this union
+
+WARNING DO NOT EDIT ANYTHING ALREADY IN THIS union AS IT COULD BREAK THINGS
+*/
 ANY_MESSAGE :: union {
     CLIENT_HELLO_MSG,
     SERVER_HELLO_MSG,
