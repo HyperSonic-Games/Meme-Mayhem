@@ -58,10 +58,11 @@ Warranty:
 */
 package Net
 
+// NOTE(A-Boring-Square): if any breaking changes ocur change by + 1
 PROTOCOL_VERSION : u16 : 00001
 
 
-MessageType :: enum u16 {
+MessageType :: enum u16le {
 
     // Connection
     CLIENT_HELLO,

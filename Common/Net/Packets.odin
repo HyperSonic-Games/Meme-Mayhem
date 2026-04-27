@@ -58,11 +58,7 @@ Warranty:
 */
 package Net
 
-import "core:reflect"
-import "base:intrinsics"
-import "base:runtime"
 import "core:encoding/uuid"
-import "../../Magma/Types"
 
 
 CLIENT_HELLO_MSG :: struct {
@@ -71,6 +67,7 @@ CLIENT_HELLO_MSG :: struct {
     player_name_len: u16le,
     player_name: [^]u8,
     protocol_version: u16le,
+    engine_version: [3]u32le,
 }
 
 SERVER_HELLO_MSG :: struct {
@@ -86,10 +83,9 @@ CLIENT_PING_MSG :: struct {
 }
 
 SERVER_PONG_MSG :: struct {
-    sequence_id: u32le,
-
     client_time_ms: u64le,
     server_time_ms: u64le,
+    sequence_id: u32le,
 }
 
 CLIENT_INPUT_MSG :: struct {
@@ -100,9 +96,9 @@ CLIENT_INPUT_MSG :: struct {
 
 SERVER_EVENT_SPAWN_MSG :: struct {
     is_player: bool, // If false it is an object like health, ammo or guns
-    player_id: uuid.Identifier,
-    player_name_len: u16le,
-    player_name: [^]u8,
+    player_id: uuid.Identifier, // this will be nil if not a player
+    player_name_len: u16le, // this is 0 if not a player
+    player_name: [^]u8, // this will be nil if not a player
     pos_x: f32le,
     pos_y: f32le,
     rot: f32le,
@@ -210,9 +206,38 @@ FOR MODDERS:
 
 when adding a new packet make sure to add it to this union
 
+NOTE: This contains both the pointer and normal variant
+
+In most cases Encode expects the normal message and decode will return a pointer variant
+
 WARNING DO NOT EDIT ANYTHING ALREADY IN THIS union AS IT COULD BREAK THINGS
 */
 ANY_MESSAGE :: union {
+    // MESSAGE POINTERS
+    ^CLIENT_HELLO_MSG,
+    ^SERVER_HELLO_MSG,
+    ^CLIENT_PING_MSG,
+    ^SERVER_PONG_MSG,
+    ^CLIENT_INPUT_MSG,
+    ^SERVER_EVENT_SPAWN_MSG,
+    ^SERVER_EVENT_DESPAWN_MSG,
+    ^SERVER_EVENT_TILE_CHANGE_MSG,
+    ^SERVER_EVENT_PLAYER_POS_CHANGE_MSG,
+    ^SERVER_EVENT_DAMAGE_DEALT_MSG,
+    ^SERVER_MAP_BEGIN_MSG,
+    ^SERVER_MAP_REGION_CHUNK_MSG,
+    ^SERVER_MAP_END_MSG,
+    ^SERVER_ASSET_BEGIN_MSG,
+    ^SERVER_ASSET_MSG,
+    ^CLIENT_ASSET_ACK_MSG,
+    ^SERVER_ASSET_END_MSG,
+    ^SERVER_WEAPON_INFO_BEGIN_MSG,
+    ^SERVER_WEAPON_INFO_MSG,
+    ^CLIENT_WEAPON_INFO_ACK_MSG,
+    ^SERVER_WEAPON_INFO_END_MSG,
+    ^SERVER_ERROR_MSG,
+
+    // MESSAGES
     CLIENT_HELLO_MSG,
     SERVER_HELLO_MSG,
     CLIENT_PING_MSG,
@@ -236,4 +261,3 @@ ANY_MESSAGE :: union {
     SERVER_WEAPON_INFO_END_MSG,
     SERVER_ERROR_MSG,
 }
-
