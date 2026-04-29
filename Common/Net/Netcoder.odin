@@ -2,7 +2,7 @@
 HyperSonic Games Non-Commercial Source License (HSG-NCSL)
 Copyright (c) 2025 HyperSonic-Games
 
-This license governs the use, modification, and distribution of [PROJECT NAME]
+This license governs the use, modification, and distribution of Meme Mayhem
 and any derivative works (“Mods”). By using or contributing to this software,
 you agree to the following terms.
 
@@ -15,9 +15,9 @@ Permissions:
 Modifications & Contributions:
   - Mods or derivative works must be released under terms that allow free use,
     modification, and redistribution.
-  - Mods must clearly indicate they are based on [PROJECT NAME].
+  - Mods must clearly indicate they are based on Meme Mayhem.
   - Mods must not imply official endorsement or affiliation with HyperSonic-Games.
-  - All contributions must include proper attribution to [OWNER NAME],
+  - All contributions must include proper attribution to HyperSonic-Games,
     specifying the mod’s relationship to the original project.
   - When a contribution, fix, or improvement is incorporated into the official
     project, credit must appear in the following format:
@@ -519,12 +519,14 @@ BufferDecode_CLIENT_HELLO_MSG :: proc(
 
 
 
+@(private)
 BufferEncode_SERVER_HELLO_MSG :: proc(msg: SERVER_HELLO_MSG, buffer: ^Buffer) {
     BufferWrite(cast(b8)msg.ack, buffer)
     BufferWrite(slice.from_ptr(msg.reason, cast(int)msg.reason_len), buffer)
     BufferWrite(msg.reason_len, buffer)
 }
 
+@(private)
 BufferDecode_SERVER_HELLO_MSG :: proc(
     buffer: ^Buffer,
     allocator := context.allocator
@@ -539,13 +541,16 @@ BufferDecode_SERVER_HELLO_MSG :: proc(
 }
 
 
+
+@(private)
 BufferEncode_CLIENT_PING_MSG :: proc(msg: CLIENT_PING_MSG, buffer: ^Buffer) {
     BufferWrite(msg.sequence_id, buffer)
     BufferWrite(msg.client_time_ms, buffer)
 }
 
-BufferDecode_CLIENT_PING_MSG :: proc(buffer: ^Buffer) -> ^CLIENT_PING_MSG {
-    msg := new(CLIENT_PING_MSG)
+@(private)
+BufferDecode_CLIENT_PING_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^CLIENT_PING_MSG {
+    msg := new(CLIENT_PING_MSG, allocator)
     msg.client_time_ms = BufferReadu64(buffer)
     msg.sequence_id = BufferReadu32(buffer)
     return msg
@@ -553,6 +558,7 @@ BufferDecode_CLIENT_PING_MSG :: proc(buffer: ^Buffer) -> ^CLIENT_PING_MSG {
 
 
 
+@(private)
 BufferEncode_SERVER_PONG_MSG :: proc(msg: SERVER_PONG_MSG, buffer: ^Buffer) {
 
     BufferWrite(msg.client_time_ms, buffer)
@@ -560,6 +566,7 @@ BufferEncode_SERVER_PONG_MSG :: proc(msg: SERVER_PONG_MSG, buffer: ^Buffer) {
     BufferWrite(msg.sequence_id, buffer)
 }
 
+@(private)
 BufferDecode_SERVER_PONG_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_PONG_MSG {
     msg := new(SERVER_PONG_MSG)
     msg.sequence_id = BufferReadu32(buffer)
@@ -571,12 +578,14 @@ BufferDecode_SERVER_PONG_MSG :: proc(buffer: ^Buffer, allocator := context.alloc
 
 
 
+@(private)
 BufferEncode_CLIENT_INPUT_MSG :: proc(msg: CLIENT_INPUT_MSG, buffer: ^Buffer) {
     BufferWrite(msg.requested_pos_change_x, buffer)
     BufferWrite(msg.requested_pos_change_y, buffer)
     BufferWrite(msg.requested_rot_change, buffer)
 }
 
+@(private)
 BufferDecode_CLIENT_INPUT_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^CLIENT_INPUT_MSG {
     msg := new(CLIENT_INPUT_MSG)
     msg.requested_rot_change = BufferReadf32(buffer)
@@ -586,6 +595,8 @@ BufferDecode_CLIENT_INPUT_MSG :: proc(buffer: ^Buffer, allocator := context.allo
 }
 
 
+
+@(private)
 BufferEncode_SERVER_EVENT_SPAWN_MSG :: proc(msg: SERVER_EVENT_SPAWN_MSG, buffer: ^Buffer) {
     if msg.player_name_len != 0 {
         BufferWrite(slice.from_ptr(msg.player_name, cast(int)msg.player_name_len), buffer)
@@ -603,6 +614,7 @@ BufferEncode_SERVER_EVENT_SPAWN_MSG :: proc(msg: SERVER_EVENT_SPAWN_MSG, buffer:
     BufferWrite(cast(b8)msg.is_player, buffer)
 }
 
+@(private)
 BufferDecode_SERVER_EVENT_SPAWN_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_EVENT_SPAWN_MSG {
     msg := new(SERVER_EVENT_SPAWN_MSG)
     msg.is_player = cast(bool)BufferReadBool(buffer)
@@ -620,6 +632,9 @@ BufferDecode_SERVER_EVENT_SPAWN_MSG :: proc(buffer: ^Buffer, allocator := contex
     return msg
 }
 
+
+
+@(private)
 BufferEncode_SERVER_EVENT_DESPAWN_MSG :: proc(msg: SERVER_EVENT_DESPAWN_MSG, buffer: ^Buffer) {
     if msg.is_player {
         for i: int = 0; i < 16; i += 1 {
@@ -632,8 +647,9 @@ BufferEncode_SERVER_EVENT_DESPAWN_MSG :: proc(msg: SERVER_EVENT_DESPAWN_MSG, buf
     }
 }
 
-BufferDecode_SERVER_EVENT_DESPAWN_MSG :: proc(buffer: ^Buffer) -> ^SERVER_EVENT_DESPAWN_MSG {
-    msg := new(SERVER_EVENT_DESPAWN_MSG)
+@(private)
+BufferDecode_SERVER_EVENT_DESPAWN_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_EVENT_DESPAWN_MSG {
+    msg := new(SERVER_EVENT_DESPAWN_MSG, allocator)
     msg.is_player = cast(bool)BufferReadBool(buffer)
     msg.rot = BufferReadf32(buffer)
     msg.pos_y = BufferReadf32(buffer)
@@ -649,6 +665,271 @@ BufferDecode_SERVER_EVENT_DESPAWN_MSG :: proc(buffer: ^Buffer) -> ^SERVER_EVENT_
     return msg
 }
 
+
+
+@(private)
+BufferEncode_SERVER_EVENT_TILE_CHANGE_MSG :: proc(msg: SERVER_EVENT_TILE_CHANGE_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.texture_id, buffer)
+    BufferWrite(msg.tile_grid_x, buffer)
+    BufferWrite(msg.tile_grid_y, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_EVENT_TILE_CHANGE_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_EVENT_TILE_CHANGE_MSG {
+    msg := new(SERVER_EVENT_TILE_CHANGE_MSG, allocator)
+    msg.tile_grid_y = BufferReadu32(buffer)
+    msg.tile_grid_x = BufferReadu32(buffer)
+    msg.texture_id = BufferReadu16(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_EVENT_PLAYER_POS_CHANGE_MSG :: proc(msg: SERVER_EVENT_PLAYER_POS_CHANGE_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.pos_x, buffer)
+    BufferWrite(msg.pos_y, buffer)
+    BufferWrite(msg.rot, buffer)
+
+    for i: int = 0; i < 16; i += 1 {
+        BufferWrite(msg.player_id[i], buffer)
+    }
+}
+
+@(private)
+BufferDecode_SERVER_EVENT_PLAYER_POS_CHANGE_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_EVENT_PLAYER_POS_CHANGE_MSG {
+    msg := new(SERVER_EVENT_PLAYER_POS_CHANGE_MSG, allocator)
+
+    for i: int = len(msg.player_id) - 1; i >= 0; i -= 1 {
+        msg.player_id[i] = BufferReadu8(buffer)
+    }
+
+    msg.rot = BufferReadf32(buffer)
+    msg.pos_y = BufferReadf32(buffer)
+    msg.pos_x = BufferReadf32(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_EVENT_DAMAGE_DEALT_MSG :: proc(msg: SERVER_EVENT_DAMAGE_DEALT_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.damage, buffer)
+
+    for i: int = 0; i < 16; i += 1 {
+        BufferWrite(msg.player[i], buffer)
+    }
+}
+
+@(private)
+BufferDecode_SERVER_EVENT_DAMAGE_DEALT_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_EVENT_DAMAGE_DEALT_MSG {
+    msg := new(SERVER_EVENT_DAMAGE_DEALT_MSG, allocator)
+
+    for i: int = len(msg.player) - 1; i >= 0; i -= 1 {
+        msg.player[i] = BufferReadu8(buffer)
+    }
+    msg.damage = BufferReadi8(buffer)
+    return msg
+
+}
+
+
+
+@(private)
+BufferEncode_SERVER_MAP_BEGIN_MSG :: proc(msg: SERVER_MAP_BEGIN_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.map_height, buffer)
+    BufferWrite(msg.map_width, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_MAP_BEGIN_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_MAP_BEGIN_MSG {
+    msg := new(SERVER_MAP_BEGIN_MSG, allocator)
+    msg.map_width = BufferReadu32(buffer)
+    msg.map_height = BufferReadu32(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_MAP_REGION_CHUNK_MSG :: proc(msg: SERVER_MAP_REGION_CHUNK_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.region_x, buffer)
+    BufferWrite(msg.region_y, buffer)
+
+    for i: int = 0; i < cast(int)msg.tiles_len; i += 1 {
+        BufferWrite(msg.tiles[i], buffer)
+    }
+
+    BufferWrite(msg.tiles_len, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_MAP_REGION_CHUNK_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_MAP_REGION_CHUNK_MSG {
+    msg := new(SERVER_MAP_REGION_CHUNK_MSG, allocator)
+    msg.tiles_len = BufferReadu32(buffer)
+
+    for i: int = cast(int)msg.tiles_len - 1; i >= 0; i -= 1 {
+        msg.tiles[i] = BufferReadu16(buffer)
+    }
+
+    msg.region_y = BufferReadu32(buffer)
+    msg.region_x = BufferReadu32(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_MAP_END_MSG :: proc(msg: SERVER_MAP_END_MSG, buffer: ^Buffer) {
+    BufferWrite(cast(b8)msg.ok, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_MAP_END_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_MAP_END_MSG {
+    msg := new(SERVER_MAP_END_MSG, allocator)
+    msg.ok = cast(bool)BufferReadBool(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_ASSET_BEGIN_MSG :: proc(msg: SERVER_ASSET_BEGIN_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.asset_count, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_ASSET_BEGIN_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_ASSET_BEGIN_MSG {
+    msg := new(SERVER_ASSET_BEGIN_MSG, allocator)
+    msg.asset_count = BufferReadu32(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_ASSET_MSG :: proc(msg: SERVER_ASSET_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.asset_id, buffer)
+    BufferWrite(slice.from_ptr(msg.asset_data, cast(int)msg.asset_data_len), buffer)
+    BufferWrite(msg.asset_data_len, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_ASSET_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_ASSET_MSG {
+    msg := new(SERVER_ASSET_MSG)
+    msg.asset_data_len = BufferReadu32(buffer)
+    msg.asset_data = BufferReadBytes(cast(int)msg.asset_data_len, buffer, allocator)
+    msg.asset_id = BufferReadu16(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_CLIENT_ASSET_ACK_MSG :: proc(msg: CLIENT_ASSET_ACK_MSG, buffer: ^Buffer) {
+    BufferWrite(cast(b8)msg.ok, buffer)
+}
+
+@(private)
+BufferDecode_CLIENT_ASSET_ACK_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^CLIENT_ASSET_ACK_MSG {
+    msg := new(CLIENT_ASSET_ACK_MSG)
+    msg.ok = cast(bool)BufferReadBool(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_ASSET_END_MSG :: proc(msg: SERVER_ASSET_END_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.asset_count, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_ASSET_END_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_ASSET_END_MSG {
+    msg := new(SERVER_ASSET_END_MSG, allocator)
+    msg.asset_count = BufferReadu32(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_WEAPON_INFO_BEGIN_MSG :: proc(msg: SERVER_WEAPON_INFO_BEGIN_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.weapon_count, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_WEAPON_INFO_BEGIN_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_WEAPON_INFO_BEGIN_MSG {
+    msg := new(SERVER_WEAPON_INFO_BEGIN_MSG, allocator)
+    msg.weapon_count = BufferReadu16(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_WEAPON_INFO_MSG :: proc(msg: SERVER_WEAPON_INFO_MSG, buffer: ^Buffer) {
+    BufferWrite(slice.from_ptr(msg.name, cast(int)msg.name_len), buffer)
+    BufferWrite(msg.name_len, buffer)
+    BufferWrite(msg.texture_id, buffer)
+    BufferWrite(msg.weapon_id, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_WEAPON_INFO_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_WEAPON_INFO_MSG {
+    msg := new(SERVER_WEAPON_INFO_MSG, allocator)
+    msg.weapon_id = BufferReadu16(buffer)
+    msg.texture_id = BufferReadu16(buffer)
+    msg.name_len = BufferReadu16(buffer)
+    msg.name = BufferReadBytes(cast(int)msg.name_len, buffer, allocator)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_CLIENT_WEAPON_INFO_ACK_MSG :: proc(msg: CLIENT_WEAPON_INFO_ACK_MSG, buffer: ^Buffer) {
+    BufferWrite(cast(b8)msg.ok, buffer)
+}
+
+@(private)
+BufferDecode_CLIENT_WEAPON_INFO_ACK_MSG :: proc(buffer: ^Buffer, alloctor := context.allocator) -> ^CLIENT_WEAPON_INFO_ACK_MSG {
+    msg := new(CLIENT_WEAPON_INFO_ACK_MSG, alloctor)
+    msg.ok = cast(bool)BufferReadBool(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_WEAPON_INFO_END_MSG :: proc(msg: SERVER_WEAPON_INFO_END_MSG, buffer: ^Buffer) {
+    BufferWrite(msg.weapon_count, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_WEAPON_INFO_END_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_WEAPON_INFO_END_MSG {
+    msg := new(SERVER_WEAPON_INFO_END_MSG, allocator)
+    msg.weapon_count = BufferReadu16(buffer)
+    return msg
+}
+
+
+
+@(private)
+BufferEncode_SERVER_ERROR_MSG :: proc(msg: SERVER_ERROR_MSG, buffer: ^Buffer) {
+    BufferWrite(cast(b8)msg.is_critical, buffer)
+    BufferWrite(slice.from_ptr(msg.reason, cast(int)msg.reason_len), buffer)
+    BufferWrite(msg.reason_len, buffer)
+}
+
+@(private)
+BufferDecode_SERVER_ERROR_MSG :: proc(buffer: ^Buffer, allocator := context.allocator) -> ^SERVER_ERROR_MSG {
+    msg := new(SERVER_ERROR_MSG, allocator)
+    msg.reason_len = BufferReadu16(buffer)
+    msg.reason = BufferReadBytes(cast(int)msg.reason_len, buffer, allocator)
+    msg.is_critical = cast(bool)BufferReadBool(buffer)
+    return msg
+}
 
 
 
@@ -759,7 +1040,7 @@ EncodeMessage :: proc(msg: ANY_MESSAGE, buffer: ^Buffer) {
 DecodeMessage :: proc(buffer: ^Buffer, allocator := context.allocator) -> ANY_MESSAGE {
     tag := BufferReadu16(buffer)
 
-    switch cast(Messagetype)tag {
+    switch cast(MessageType)tag {
         case .CLIENT_HELLO:
             return BufferDecode_CLIENT_HELLO_MSG(buffer, allocator)
 

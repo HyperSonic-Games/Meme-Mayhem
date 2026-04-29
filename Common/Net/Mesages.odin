@@ -2,7 +2,7 @@
 HyperSonic Games Non-Commercial Source License (HSG-NCSL)
 Copyright (c) 2025 HyperSonic-Games
 
-This license governs the use, modification, and distribution of [PROJECT NAME]
+This license governs the use, modification, and distribution of Meme Mayhem
 and any derivative works (“Mods”). By using or contributing to this software,
 you agree to the following terms.
 
@@ -15,9 +15,9 @@ Permissions:
 Modifications & Contributions:
   - Mods or derivative works must be released under terms that allow free use,
     modification, and redistribution.
-  - Mods must clearly indicate they are based on [PROJECT NAME].
+  - Mods must clearly indicate they are based on Meme Mayhem.
   - Mods must not imply official endorsement or affiliation with HyperSonic-Games.
-  - All contributions must include proper attribution to [OWNER NAME],
+  - All contributions must include proper attribution to HyperSonic-Games,
     specifying the mod’s relationship to the original project.
   - When a contribution, fix, or improvement is incorporated into the official
     project, credit must appear in the following format:
