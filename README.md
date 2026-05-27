@@ -15,7 +15,7 @@ This is the new and improved version of Meme Mayhem, now being rebuilt in Odin f
 
 # Building
 
-To build the project simply run `odin run Build.odin -file`
+To build the project simply run `python Build.py`
 
 # Come say hi
 [Our Discord](https://discord.gg/AFD9KwPCXk)
