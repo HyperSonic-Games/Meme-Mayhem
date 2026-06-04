@@ -59,7 +59,6 @@ Warranty:
 package Net
 
 import "core:math/linalg"
-import "core:math"
 import "core:strings"
 import "core:slice"
 
