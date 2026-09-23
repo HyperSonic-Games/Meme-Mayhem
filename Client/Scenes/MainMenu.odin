@@ -1,6 +1,6 @@
 /* 
 HyperSonic Games Non-Commercial Source License (HSG-NCSL) 
-Copyright (c) 2025 HyperSonic Games
+Copyright (c) 2026 HyperSonic Games
 
 This license governs the use, modification, and distribution of Meme Mayhem and any derivative works (“Mods”). By using, modifying, or distributing this software, you agree to the following terms.
 
@@ -14,8 +14,8 @@ Modifications & Contributions:
 - Mods must clearly indicate they are based on Meme Mayhem and must not imply official endorsement or affiliation with HyperSonic Games.
 - By making a Mod or contribution publicly available, you grant HyperSonic Games a perpetual, irrevocable, royalty-free license to use and integrate your changes into the official project.
 - When a contribution, fix, or improvement is incorporated into the official project, credit will appear in the source code as:
-  // Contribution by: [MODDER NAME]
-  // Description: Brief description of the fix or improvement code
+    // Contribution by: [MODDER NAME]
+    // Description: Brief description of the fix or improvement code
 
 Commercial Restriction:
 - The Software and all Mods may NOT be used for any Commercial Purpose.
@@ -35,15 +35,22 @@ INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PA
 AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE, MODIFICATIONS, OR THEIR DISTRIBUTION.
 */
-package main
-
-import "../Magma/Types"
-import "../Magma/Util"
-import "../Magma/2D/Renderer"
-import "../Magma/2D/UI"
-import "../Magma/2D/EventSys"
+package Scenes
 
 
-main :: proc() {
+ButtonStatus :: enum {
+    PLAY,
+    SETTINGS,
+    QUIT
+}
 
+MainMenuState :: struct {
+    button_status: ButtonStatus,
+    
+}
+
+
+@(private="file")
+init :: proc(self: ^Scene) -> bool {
+    return true
 }
