@@ -1,3 +1,6 @@
 [submodule "Magma"]
 	path = Magma
 	url = https://github.com/HyperSonic-Games/Magma
+[submodule "HSGLF"]
+	path = HSGLF
+	url = https://github.com/HyperSonic-Games/HSGLF
