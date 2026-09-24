@@ -37,7 +37,6 @@ DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE, MODIFICATIONS,
 */
 package Net
 
-import "core:math/linalg"
 import "core:strings"
 import "core:slice"
 
@@ -302,7 +301,11 @@ is going to be like OMG they have this built in
 
 The returned string is allocated to the heap and must be freed by the caller
 */
-BufferReadString :: proc(buffer: ^Buffer, string_buffer: ^[dynamic]u8, allocator := context.allocator) -> string {
+BufferReadString :: proc(
+    buffer: ^Buffer,
+    string_buffer: ^[dynamic]u8,
+    allocator := context.allocator
+) -> string {
     length: u64le = BufferReadu64(buffer)
 
     start := cast(u64le)len(string_buffer)
@@ -1074,5 +1077,3 @@ DecodeMessage :: proc(buffer: ^Buffer, allocator := context.allocator) -> ANY_ME
             panic("Invalid message tag")
     }
 }
-
-linalg.normalize()

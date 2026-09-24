@@ -127,7 +127,7 @@ this is just to tell the client so it can display info to the user
 */
 SERVER_EVENT_DAMAGE_DEALT_MSG :: struct {
     player: uuid.Identifier,
-    damage: i8, // clamped between -250 to 250
+    damage: i8, // clamped between -128 to 127
 }
 
 SERVER_MAP_BEGIN_MSG :: struct {
@@ -140,7 +140,7 @@ SERVER_MAP_REGION_CHUNK_MSG :: struct {
     region_y: u32le,
 
     tiles_len: u32le,
-    tiles: [^]u16le, // row-major
+    tiles: [^]u16le, // row major
 }
 
 SERVER_MAP_END_MSG :: struct {
@@ -160,6 +160,7 @@ SERVER_ASSET_MSG :: struct {
 CLIENT_ASSET_ACK_MSG :: struct {
     ok: bool, // if false the server will retry up to 7 times before terminating the conection
 }
+
 SERVER_ASSET_END_MSG :: struct {
     asset_count: u32le,
 }
