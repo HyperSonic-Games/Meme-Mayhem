@@ -1,5 +1,5 @@
-/* 
-HyperSonic Games Non-Commercial Source License (HSG-NCSL) 
+/*
+HyperSonic Games Non-Commercial Source License (HSG-NCSL)
 Copyright (c) 2026 HyperSonic Games
 
 This license governs the use, modification, and distribution of Meme Mayhem and any derivative works (“Mods”). By using, modifying, or distributing this software, you agree to the following terms.
@@ -29,28 +29,147 @@ Responsibilities & Disclaimers:
 
 Objective: This license is intended to encourage open collaboration and modding while ensuring that all improvements remain freely accessible, properly attributed, and not commercially exploited.
 
-Warranty: 
+Warranty:
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
 AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE, MODIFICATIONS, OR THEIR DISTRIBUTION.
 */
+
 package Scenes
 
+import "../../Magma/2D/Renderer"
+import "../../Magma/2D/UI"
+import "../../Magma/Types"
+import "../../Magma/2D/EventSys"
 
 ButtonStatus :: enum {
+    NONE,
     PLAY,
     SETTINGS,
-    QUIT
+    QUIT,
 }
 
 MainMenuState :: struct {
     button_status: ButtonStatus,
-    
 }
 
+@(private="file")
+init :: proc(self: ^Scene, data: rawptr = nil) -> bool {
+    state, err := new(MainMenuState)
+    if err != .None {
+        return false
+    }
+
+    state^ = MainMenuState{
+        button_status = .NONE,
+    }
+
+    self.name = "MAIN_MENU"
+    self.state = state
+    return true
+}
 
 @(private="file")
-init :: proc(self: ^Scene) -> bool {
-    return true
+cleanup :: proc(self: ^Scene) {
+    if self.state != nil {
+        free(transmute(^MainMenuState)self.state)
+        self.state = nil
+    }
+}
+
+@(private="file")
+update :: proc(
+    self: ^Scene,
+    renderer_ctx: ^Renderer.RenderContext,
+    ui_ctx: ^UI.UIContext,
+    keyboard_state: ^EventSys.Keyboard,
+    window_state: ^EventSys.WindowState,
+    delta_time: f32,
+) {
+    EventSys.HandleEvents(
+        renderer_ctx,
+        ui_ctx.mouse_input,
+        keyboard_state,
+        window_state,
+    )
+
+    if window_state.should_quit {
+        return
+    }
+
+    middle_point := cast([2]f32)Types.Vector2MiddlePoint(Renderer.GetRendererSize(renderer_ctx^))
+
+    state := transmute(^MainMenuState)self.state
+
+    // TODO: Replace these placeholders with the actual logo and splash text.
+    // TODO: Draw the button labels using the renderer's text API.
+
+    button_size := [2]f32{120, 36}
+    button_spacing: f32 = 12
+    start_y := middle_point.y + 20
+
+    play_position := [2]f32{
+        middle_point.x - button_size.x / 2,
+        start_y,
+    }
+
+    settings_position := [2]f32{
+        middle_point.x - button_size.x / 2,
+        start_y + button_size.y + button_spacing,
+    }
+
+    quit_position := [2]f32{
+        middle_point.x - button_size.x / 2,
+        start_y + (button_size.y + button_spacing) * 2,
+    }
+
+    normal_color := Types.Color{255, 255, 255, 255}
+    hover_color := Types.Color{254, 254, 254, 255}
+
+    play_button := UI.Button(
+        ui_ctx,
+        play_position,
+        button_size,
+        normal_color,
+        hover_color,
+    )
+
+    settings_button := UI.Button(
+        ui_ctx,
+        settings_position,
+        button_size,
+        normal_color,
+        hover_color,
+    )
+
+    quit_button := UI.Button(
+        ui_ctx,
+        quit_position,
+        button_size,
+        normal_color,
+        hover_color,
+    )
+
+    EventSys.ResetWindowFlags(window_state)
+
+    state.button_status = .NONE
+
+    if play_button {
+        state.button_status = .PLAY
+    } else if settings_button {
+        state.button_status = .SETTINGS
+    } else if quit_button {
+        state.button_status = .QUIT
+    }
+    Renderer.Update(renderer_ctx)
+}
+
+MainMenuSceneInit :: proc() -> Scene {
+    scene: Scene
+    scene.init = init
+    scene.update = update
+    scene.cleanup = cleanup
+    scene.name = "MAIN_MENU"
+    return scene
 }

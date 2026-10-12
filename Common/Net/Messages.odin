@@ -14,8 +14,8 @@ Modifications & Contributions:
 - Mods must clearly indicate they are based on Meme Mayhem and must not imply official endorsement or affiliation with HyperSonic Games.
 - By making a Mod or contribution publicly available, you grant HyperSonic Games a perpetual, irrevocable, royalty-free license to use and integrate your changes into the official project.
 - When a contribution, fix, or improvement is incorporated into the official project, credit will appear in the source code as:
-  // Contribution by: [MODDER NAME]
-  // Description: Brief description of the fix or improvement code
+    // Contribution by: [MODDER NAME]
+    // Description: Brief description of the fix or improvement code
 
 Commercial Restriction:
 - The Software and all Mods may NOT be used for any Commercial Purpose.
@@ -70,7 +70,7 @@ MessageType :: enum u16le {
     SERVER_ASSET,
     CLIENT_ASSET_ACK,
     SERVER_ASSET_END,
-    
+        
     // Weapon information
     SERVER_WEAPON_INFO_BEGIN,
     SERVER_WEAPON_INFO,

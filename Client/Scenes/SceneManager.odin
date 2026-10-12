@@ -43,22 +43,25 @@ import "core:container/xar"
 import "../../Magma/2D/Renderer"
 import "../../Magma/2D/UI"
 import "../../Magma/Util"
+import "../../Magma/2D/EventSys"
+
 
 Scene :: struct {
     name: string,
 
-    init: proc(self: ^Scene) -> bool,
+    init: proc(self: ^Scene, data: rawptr = nil) -> bool,
     update: proc(
         self: ^Scene,
-        render_ctx: ^Renderer.RenderContext,
+        renderer_ctx: ^Renderer.RenderContext,
         ui_ctx: ^UI.UIContext,
+        keyboard_state: ^EventSys.Keyboard,
+        window_state: ^EventSys.WindowState,
         delta_time: f32
     ),
     cleanup: proc(self: ^Scene),
 
     state: rawptr // NOTE: managed by the Scene
 }
-
 
 SceneManager :: struct {
     scene_buffer: xar.Array(Scene, 6),
@@ -224,6 +227,8 @@ UpdateScene :: proc(
     scene_manager: ^SceneManager,
     render_ctx: ^Renderer.RenderContext,
     ui_ctx: ^UI.UIContext,
+    keyboard_state: ^EventSys.Keyboard,
+    window_state: ^EventSys.WindowState,
     delta_time: f32
 ) {
     if scene_manager.current_scene.update == nil {
@@ -254,7 +259,25 @@ UpdateScene :: proc(
         )
     }
 
-    scene_manager.current_scene->update(render_ctx, ui_ctx, delta_time)
+    if keyboard_state == nil {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "SCENE_MANAGER_UPDATE_SCENE",
+            "Expected keyboard_state but got nil"
+        )
+    }
+
+    if window_state == nil {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "SCENE_MANAGER_UPDATE_SCENE",
+            "Expected window_state but got nil"
+        )
+    }
+
+    scene_manager.current_scene->update(render_ctx, ui_ctx, keyboard_state, window_state, delta_time)
 
 }
 

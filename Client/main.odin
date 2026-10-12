@@ -37,13 +37,250 @@ DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE, MODIFICATIONS,
 */
 package main
 
+import "core:mem"
+import "core:fmt"
 import "../Magma/Types"
 import "../Magma/Util"
 import "../Magma/2D/Renderer"
 import "../Magma/2D/UI"
 import "../Magma/2D/EventSys"
+import "Scenes"
+import "Lib"
+
+@(private)
+scene_manager: ^Scenes.SceneManager
+
+keyboard_events: ^EventSys.Keyboard
+mouse_events: ^EventSys.Mouse
+window_state: ^EventSys.WindowState
+
+ui_ctx: ^UI.UIContext
+
+renderer_ctx: Renderer.RenderContext
+
+/*
+NOTE(A-Boring-Square): if needed change backend here
+this is useful for debuging, performance and/or porting to other platforms
+we chose OpenGL as a backend by default for broad compat and more speed then just software rendering
+*/
+GRAPHICS_BACKEND: Renderer.GraphicsBackend : .OPEN_GL
+
+windowed_mode :: ODIN_DEBUG
+
+
+/*
+NOTE(A-Boring-Square)
+I should realy stop forgeting to add scenes to this enum
+*/
+SceneRegistry :: enum {
+    None,
+    MainMenu,
+    Settings,
+    Game
+}
+
+NextScene: SceneRegistry = .None
+
+Setup :: proc() {
+
+    scene_manager = Scenes.InitSceneManager()
+
+    err: mem.Allocator_Error
+
+    Lib.FontStorage, err = new(Util.FontStorage)
+
+    if err != .None {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "SETUP",
+            "Could not allocate memory for FontStorage"
+        )
+    }
+
+    Lib.InitFontStorage()
+
+    keyboard_events, err = new(EventSys.Keyboard)
+
+    if err != .None {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "SETUP",
+            "Could not allocate memory for keyboard_events"
+        )
+    }
+
+    mouse_events, err = new(EventSys.Mouse)
+
+    if err != .None {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "SETUP",
+            "Could not allocate memory for mouse_events"
+        )
+    }
+
+    window_state, err = new(EventSys.WindowState)
+
+    if err != .None {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "SETUP",
+            "Could not allocate memory for window_state"
+        )
+    }
+
+    Scenes.AddScene(scene_manager, Scenes.MainMenuSceneInit)
+    // NOTE(A-Boring-Square) add more scenes here
+}
+
+Cleanup :: proc() {
+    Lib.DestroyFontStorage()
+    Scenes.ShutdownSceneManager(scene_manager)
+    free(keyboard_events)
+    free(mouse_events)
+    free(window_state)
+}
 
 
 main :: proc() {
+    when ODIN_DEBUG {
+        track: mem.Tracking_Allocator
+        mem.tracking_allocator_init(&track, context.allocator)
+        
+        defer mem.tracking_allocator_destroy(&track)
+        context.allocator = mem.tracking_allocator(&track)
+    }
 
+    Util.Log(
+        .VERBOSE,
+        "MEME_MAYHEM_CLIENT",
+        "MAIN",
+        "Starting Setup..."
+    )
+
+    Setup()
+
+    Util.Log(
+        .VERBOSE,
+        "MEME_MAYHEM_CLIENT",
+        "MAIN",
+        "Setup complete starting renderer and loading client data.."
+    )
+
+    renderer_ctx = Renderer.Init(
+        "MEME_MAYHEM",
+        "Meme Mayhem ALPHA",
+        800,
+        400,
+        GRAPHICS_BACKEND,
+        false // set to true for when something realy bad happens and we can not figure out why
+    )
+
+    ui_ctx = UI.CreateUIContext(&renderer_ctx, mouse_events)
+
+    Renderer.SetFullscreen(
+        renderer_ctx,
+        !windowed_mode
+    )
+    
+    // Load the initial scene once.
+    NextScene = .MainMenu
+    Scenes.LoadScene(scene_manager, "MAIN_MENU")
+    
+    // Main loop
+    for !window_state.should_quit {
+        Renderer.FPSLimiter(60)
+        delta_time := Renderer.GetDeltaTime()
+
+        Renderer.ClearScreen(&renderer_ctx, Types.Color{0, 0, 0, 255})
+        
+        Scenes.UpdateScene(
+            scene_manager,
+            &renderer_ctx,
+            ui_ctx,
+            keyboard_events,
+            window_state,
+            delta_time,
+        )
+
+        Renderer.PresentScreen(&renderer_ctx)
+        
+        switch Scenes.GetCurrentlyLoadedScene(scene_manager) {
+            case "MAIN_MENU":
+                state := transmute(^Scenes.MainMenuState)(Scenes.GetSceneData(scene_manager))
+                
+                switch state.button_status {
+                    case .NONE:
+                        break
+                    
+                    case .PLAY:
+                        NextScene = .Game
+                    
+                    case .SETTINGS:
+                        NextScene = .Settings
+                    
+                    case .QUIT:
+                        window_state.should_quit = true
+                }
+            
+            case "SETTINGS":
+                // Handle settings state here.
+                break
+            
+            case "GAMEPLAY":
+                // Handle gameplay state here.
+                break
+        }
+        
+        if NextScene != .None {
+            switch NextScene {
+                case .MainMenu:
+                    Scenes.LoadScene(scene_manager, "MAIN_MENU")
+            
+                case .Settings:
+                    Scenes.LoadScene(scene_manager, "SETTINGS")
+                
+                case .Game:
+                    Scenes.LoadScene(scene_manager, "GAME")
+                
+                case .None:
+                    break
+            }
+            
+            NextScene = .None
+        }
+    }
+
+    Util.Log(
+        .VERBOSE,
+        "MEME_MAYHEM_CLIENT",
+        "MAIN",
+        "Cleaning up..."
+    )
+
+    Renderer.Shutdown(renderer_ctx)
+    UI.DestroyUIContext(ui_ctx)
+    Cleanup()
+
+    when ODIN_DEBUG {
+        if len(track.allocation_map) > 0 {
+            fmt.eprintf("=== %v Memory Leaks ===\n", len(track.allocation_map))
+            
+            for _, entry in track.allocation_map {
+                fmt.eprintf("- %v bytes leaked @ %v\n", entry.size, entry.location)
+            }
+        }
+
+        if len(track.bad_free_array) > 0 {
+            fmt.eprintf("=== %v Bad Frees ===\n", len(track.bad_free_array))
+            
+            for entry in track.bad_free_array {
+                fmt.eprintf("- Bad free @ %v\n", entry.location)
+            }
+        }
+    }
 }
