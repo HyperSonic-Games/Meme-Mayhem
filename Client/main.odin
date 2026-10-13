@@ -45,18 +45,7 @@ import "../Magma/2D/Renderer"
 import "../Magma/2D/UI"
 import "../Magma/2D/EventSys"
 import "Scenes"
-import "Lib"
 
-@(private)
-scene_manager: ^Scenes.SceneManager
-
-keyboard_events: ^EventSys.Keyboard
-mouse_events: ^EventSys.Mouse
-window_state: ^EventSys.WindowState
-
-ui_ctx: ^UI.UIContext
-
-renderer_ctx: Renderer.RenderContext
 
 /*
 NOTE(A-Boring-Square): if needed change backend here
@@ -79,73 +68,6 @@ SceneRegistry :: enum {
     Game
 }
 
-NextScene: SceneRegistry = .None
-
-Setup :: proc() {
-
-    scene_manager = Scenes.InitSceneManager()
-
-    err: mem.Allocator_Error
-
-    Lib.FontStorage, err = new(Util.FontStorage)
-
-    if err != .None {
-        Util.Log(
-            .ERROR,
-            "MEME_MAYHEM_CLIENT",
-            "SETUP",
-            "Could not allocate memory for FontStorage"
-        )
-    }
-
-    Lib.InitFontStorage()
-
-    keyboard_events, err = new(EventSys.Keyboard)
-
-    if err != .None {
-        Util.Log(
-            .ERROR,
-            "MEME_MAYHEM_CLIENT",
-            "SETUP",
-            "Could not allocate memory for keyboard_events"
-        )
-    }
-
-    mouse_events, err = new(EventSys.Mouse)
-
-    if err != .None {
-        Util.Log(
-            .ERROR,
-            "MEME_MAYHEM_CLIENT",
-            "SETUP",
-            "Could not allocate memory for mouse_events"
-        )
-    }
-
-    window_state, err = new(EventSys.WindowState)
-
-    if err != .None {
-        Util.Log(
-            .ERROR,
-            "MEME_MAYHEM_CLIENT",
-            "SETUP",
-            "Could not allocate memory for window_state"
-        )
-    }
-
-    Scenes.AddScene(scene_manager, Scenes.MainMenuSceneInit)
-    // NOTE(A-Boring-Square) add more scenes here
-}
-
-Cleanup :: proc() {
-    Lib.DestroyFontStorage()
-    Scenes.ShutdownSceneManager(scene_manager)
-    free(keyboard_events)
-    free(mouse_events)
-    free(window_state)
-}
-
-
 main :: proc() {
     when ODIN_DEBUG {
         track: mem.Tracking_Allocator
@@ -162,13 +84,60 @@ main :: proc() {
         "Starting Setup..."
     )
 
-    Setup()
+    NextScene: SceneRegistry = .None
+
+    err: mem.Allocator_Error
+
+    keyboard_events: ^EventSys.Keyboard
+
+    keyboard_events, err = new(EventSys.Keyboard)
+    if err != .None {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "MAIN",
+            "Could not allocate memory for keyboard_events"
+        )
+    }
+
+    mouse_events: ^EventSys.Mouse
+
+    mouse_events, err = new(EventSys.Mouse)
+    if err != .None {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "MAIN",
+            "Could not allocate memory for mouse_events"
+        )
+    }
+
+    window_state: ^EventSys.WindowState
+
+    scene_manager: ^Scenes.SceneManager
+    scene_manager = Scenes.InitSceneManager()
+
+    window_state, err = new(EventSys.WindowState)
+    if err != .None {
+        Util.Log(
+            .ERROR,
+            "MEME_MAYHEM_CLIENT",
+            "MAIN",
+            "Could not allocate memory for window_state"
+        )
+    }
+
+
+
+    ui_ctx: ^UI.UIContext
+
+    renderer_ctx: Renderer.RenderContext
 
     Util.Log(
         .VERBOSE,
         "MEME_MAYHEM_CLIENT",
         "MAIN",
-        "Setup complete starting renderer and loading client data.."
+        "Setup complete loading client data.."
     )
 
     renderer_ctx = Renderer.Init(
@@ -207,6 +176,7 @@ main :: proc() {
             delta_time,
         )
 
+        Renderer.Update(&renderer_ctx)
         Renderer.PresentScreen(&renderer_ctx)
         
         switch Scenes.GetCurrentlyLoadedScene(scene_manager) {
@@ -264,7 +234,13 @@ main :: proc() {
 
     Renderer.Shutdown(renderer_ctx)
     UI.DestroyUIContext(ui_ctx)
-    Cleanup()
+
+    free(keyboard_events)
+    free(mouse_events)
+    free(window_state)
+    Scenes.ShutdownSceneManager(scene_manager)
+
+    free_all(context.temp_allocator)
 
     when ODIN_DEBUG {
         if len(track.allocation_map) > 0 {
