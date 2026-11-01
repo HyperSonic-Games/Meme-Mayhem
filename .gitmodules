@@ -1,3 +1,9 @@
 [submodule "Libs/raylib"]
 	path = Libs/raylib
 	url = https://github.com/raysan5/raylib
+[submodule "Libs/enet"]
+	path = Libs/enet
+	url = https://github.com/lsalzman/enet
+[submodule "Libs/miniz"]
+	path = Libs/miniz
+	url = https://github.com/richgel999/miniz
