@@ -59,12 +59,15 @@ Any violation of the Non-Commercial Restriction, Mod Requirements, or attributio
 */
 #include "asset_system.h"
 #include "miniz_zip.h"
+#include "raylib/src/raylib.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+
 
 
 char *TrimWhitespace(char *str) {
@@ -88,7 +91,8 @@ bool AssetRegistryGrow(asset_registry *registry) {
         return true;
     }
 
-    uint32_t new_capacity = registry->capacity ? registry->capacity * 2 : ASSET_REGISTRY_INITIAL_CAPACITY;
+    uint32_t new_capacity = registry->capacity ?
+    registry->capacity * 2 : ASSET_REGISTRY_INITIAL_CAPACITY;
 
     if (new_capacity < registry->capacity) {
         return false;
@@ -328,7 +332,6 @@ asset_type AssetTypeFromID(uint32_t id) {
     return ASSET_TYPE_UNKNOWN;
 }
 
-// registry initialization
 bool AssetRegistryInit(
     asset_registry *registry,
     const void *archive_data,
@@ -363,8 +366,6 @@ bool AssetRegistryInit(
     return true;
 }
 
-
-// registry shutdown
 void AssetRegistryShutdown(asset_registry *registry) {
     if (!registry) {
         return;
@@ -381,7 +382,6 @@ void AssetRegistryShutdown(asset_registry *registry) {
     memset(registry, 0, sizeof(*registry));
 }
 
-// registry lookup
 asset_registry_entry *AssetRegistryFind(asset_registry *registry, uint32_t id) {
     if (!registry || !registry->initialized) {
         return NULL;
@@ -432,7 +432,6 @@ uint32_t AssetRegistryGetCount(const asset_registry *registry) {
     return registry->count;
 }
 
-// raw data extraction
 const void *AssetRegistryGetData(asset_registry *registry, uint32_t id, size_t *out_size) {
     if (out_size) {
         *out_size = 0;
@@ -462,13 +461,13 @@ const void *AssetRegistryGetData(asset_registry *registry, uint32_t id, size_t *
         entry->loaded_asset.loaded = true;
     }
 
-    if (out_size)
+    if (out_size) {
         *out_size = entry->loaded_asset.data.raw.size;
+    }
 
     return entry->loaded_asset.data.raw.data;
 }
 
-// texture loading
 Texture *AssetRegistryGetTexture(asset_registry *registry, uint32_t id) {
     asset_registry_entry *entry = AssetRegistryFind(registry, id);
 
@@ -525,7 +524,6 @@ Texture *AssetRegistryGetTexture(asset_registry *registry, uint32_t id) {
     return &entry->loaded_asset.data.texture.texture;
 }
 
-// sound loading
 Sound *AssetRegistryGetSound(asset_registry *registry, uint32_t id) {
     asset_registry_entry *entry = AssetRegistryFind(registry, id);
 
@@ -582,7 +580,6 @@ Sound *AssetRegistryGetSound(asset_registry *registry, uint32_t id) {
     return &entry->loaded_asset.data.sound.sound;
 }
 
-// music loading
 Music *AssetRegistryGetMusic( asset_registry *registry, uint32_t id) {
     asset_registry_entry *entry = AssetRegistryFind(registry, id);
 
@@ -632,7 +629,6 @@ Music *AssetRegistryGetMusic( asset_registry *registry, uint32_t id) {
     return &entry->loaded_asset.data.music.music;
 }
 
-// font loading
 Font *AssetRegistryGetFont(asset_registry *registry, uint32_t id) {
     asset_registry_entry *entry = AssetRegistryFind(registry, id);
 
@@ -684,7 +680,6 @@ Font *AssetRegistryGetFont(asset_registry *registry, uint32_t id) {
     return &entry->loaded_asset.data.font.font;
 }
 
-// asset type conversion
 asset_type AssetTypeFromString(const char *type) {
     if (!type) {
         return ASSET_TYPE_UNKNOWN;
@@ -735,7 +730,6 @@ const char *AssetTypeToString(asset_type type) {
     }
 }
 
-// asset unloading */
 bool AssetRegistryUnload(asset_registry *registry, uint32_t id) {
     asset_registry_entry *entry = AssetRegistryFind(registry, id);
 
@@ -793,4 +787,234 @@ void AssetRegistryUnloadAll(asset_registry *registry) {
     for (uint32_t i = 0; i < registry->count; i++) {
         AssetRegistryUnload(registry, registry->entries[i].id);
     }
+}
+
+
+bool IsSafeAssetPath(const char *path) {
+    if (path == NULL || path[0] == '\0') {
+        return false;
+    }
+    if (path[0] == '/' || path[0] == '\\') {
+        return false;
+    }
+    if (strchr(path, '\\') != NULL || strchr(path, ':') != NULL) {
+        return false;
+    }
+
+    const char *component = path;
+
+    while (*component != '\0') {
+        const char *separator = strchr(component, '/');
+        size_t length = separator ? (size_t)(separator - component) : strlen(component);
+
+        if (length == 0) {
+            return false;
+        }
+
+        if (
+            (length == 1 && component[0] == '.') ||
+            (length == 2 && component[0] == '.' && component[1] == '.')
+        ) {
+            return false;
+        }
+
+        if (separator == NULL) {
+            break;
+        }
+
+        component = separator + 1;
+    }
+
+    return true;
+}
+
+bool CreateAssetPackage(const char *folder_path, void **out_data, size_t *out_size) {
+    if (out_data == NULL || out_size == NULL) {
+        return false;
+    }
+
+    *out_data = NULL;
+    *out_size = 0;
+
+    if (folder_path == NULL || folder_path[0] == '\0') {
+        return false;
+    }
+
+    // construct the manifest path
+    size_t folder_length = strlen(folder_path);
+    size_t manifest_path_size = folder_length + sizeof("/manifest.csv");
+
+    char *manifest_path = malloc(manifest_path_size);
+    if (manifest_path == NULL) {
+        return false;
+    }
+
+    snprintf(manifest_path, manifest_path_size, "%s/manifest.csv", folder_path);
+
+    // read the manifest
+    char *manifest = LoadFileText(manifest_path);
+    free(manifest_path);
+
+    if (manifest == NULL) {
+        return false;
+    }
+
+    // initialize the ZIP archive
+    mz_zip_archive archive = {0};
+
+    if (!mz_zip_writer_init_heap(&archive, 0, 0)) {
+        UnloadFileText(manifest);
+        return false;
+    }
+
+    bool success = true;
+    size_t added_files = 0;
+
+    char *line = manifest;
+
+    while (*line != '\0') {
+        char *next_line = strchr(line, '\n');
+
+        if (next_line != NULL) {
+            *next_line = '\0';
+            next_line++;
+        }
+
+        char *current = TrimWhitespace(line);
+
+        line = next_line != NULL ? next_line : line + strlen(line);
+
+        if (current[0] == '\0') {
+            continue;
+        }
+
+        // parse the three CSV fields
+        char *id_field = current;
+        char *path_field = strchr(id_field, ',');
+
+        if (path_field == NULL) {
+            success = false;
+            break;
+        }
+
+        *path_field++ = '\0';
+
+        char *type_field = strchr(path_field, ',');
+
+        if (type_field == NULL) {
+            success = false;
+            break;
+        }
+
+        *type_field++ = '\0';
+
+        id_field = TrimWhitespace(id_field);
+        path_field = TrimWhitespace(path_field);
+        type_field = TrimWhitespace(type_field);
+
+        // skip the CSV header
+        if (strcmp(id_field, "id") == 0 &&
+            strcmp(path_field, "path") == 0) {
+            continue;
+        }
+
+        // validate the manifest fields.
+        if (
+            id_field[0] == '\0' ||
+            path_field[0] == '\0' ||
+            type_field[0] == '\0' ||
+            strchr(type_field, ',') != NULL ||
+            !IsSafeAssetPath(path_field)
+        ) {
+            success = false;
+            break;
+        }
+
+        // validate the asset ID
+        errno = 0;
+        char *end = NULL;
+        unsigned long id = strtoul(id_field, &end, 10);
+
+        if (errno != 0 || end == id_field || *end != '\0' || id > UINT32_MAX) {
+            success = false;
+            break;
+        }
+
+        // construct the full filesystem path
+        size_t full_path_size = folder_length + strlen(path_field) + 2;
+
+        char *full_path = malloc(full_path_size);
+
+        if (full_path == NULL) {
+            success = false;
+            break;
+        }
+
+        snprintf(full_path, full_path_size, "%s/%s", folder_path, path_field);
+
+        // verify that the file exists
+        if (!FileExists(full_path)) {
+            free(full_path);
+            success = false;
+            break;
+        }
+
+        // add the file using its relative path as the ZIP entry name
+        if (!mz_zip_writer_add_file(
+                &archive,
+                path_field,
+                full_path,
+                NULL,
+                0,
+                MZ_DEFAULT_COMPRESSION
+            )) {
+            free(full_path);
+            success = false;
+            break;
+        }
+
+        free(full_path);
+        added_files++;
+    }
+
+    UnloadFileText(manifest);
+
+    // an empty manifest is not a valid asset package.
+    if (added_files == 0) {
+        success = false;
+    }
+
+    void *zip_data = NULL;
+    size_t zip_size = 0;
+
+    if (success) {
+        success = mz_zip_writer_finalize_heap_archive(
+            &archive,
+            &zip_data,
+            &zip_size
+        );
+    }
+
+    mz_zip_writer_end(&archive);
+
+    if (!success) {
+        if (zip_data != NULL) mz_free(zip_data);
+        return false;
+    }
+
+    // copy the ZIP data into a standard malloc allocation
+    void *result = malloc(zip_size);
+
+    if (result == NULL) {
+        mz_free(zip_data);
+        return false;
+    }
+
+    memcpy(result, zip_data, zip_size);
+    mz_free(zip_data);
+
+    *out_data = result;
+    *out_size = zip_size;
+
+    return true;
 }

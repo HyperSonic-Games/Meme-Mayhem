@@ -273,4 +273,16 @@ Unloads every loaded asset while keeping the registry and archive.
 */
 void AssetRegistryUnloadAll(asset_registry *registry);
 
+/*
+Builds the asset package from a directory
+
+The caller owns the returned buffer and must free it
+*/
+bool CreateAssetPackage(
+    const char *folder_path,
+    void **out_data,
+    size_t *out_size
+);
+
+
 #endif // MEME_MAYHEM_COMMON_ASSET_SYSTEM_H
