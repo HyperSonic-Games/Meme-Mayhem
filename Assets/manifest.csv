@@ -1,0 +1,17 @@
+id,path,type
+0,Images/Player/BLACK.png,TEXTURE
+1,Images/Player/BLUE.png,TEXTURE
+2,Images/Player/GREEN.png,TEXTURE
+3,Images/Player/ORANGE.png,TEXTURE
+4,Images/Player/PINK.png,TEXTURE
+5,Images/Player/PURPLE.png,TEXTURE
+6,Images/Player/RED.png,TEXTURE
+7,Images/Player/WHITE.png,TEXTURE
+8,Images/Player/YELLOW.png,TEXTURE
+1000,Images/Weapons/AUTOMATIC_KALASHNIKOV_47.png,TEXTURE
+1001,Images/Weapons/CHEWIECATTS_BUBLGUM_MINIGUN.png,TEXTURE
+1002,Images/Weapons/MOOSEYS_ANTLERS.png,TEXTURE
+1003,Images/Weapons/THE_FATHERS_BELT.png,TEXTURE
+1004,Images/Weapons/THE_MOTHERS_ROLLING_PIN.png,TEXTURE
+4000,Fonts/Open_Sans/OpenSans-Bold.ttf,FONT
+4001,Fonts/Open_Sans/OpenSans-Regular.ttf,FONT

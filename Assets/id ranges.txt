@@ -1,0 +1,42 @@
+Server Asset ID Ranges
+
+This system is primarily intended for people who want to mod the game or 
+otherwise modify its assets.
+
+Each asset category has a reserved range of 1000 IDs.
+
+0–999     - Player assets
+1000–1999 - Weapon assets
+2000–2999 - Map assets
+3000–3999 - Projectile assets
+4000–4999 - Fonts
+5000–5999 - Sounds
+6000–6999 - Music
+7000–7999 - UI assets
+8000–8999 - Other assets
+
+Data Assets
+
+Data files are stored in the Other assets range (8000–8999).
+
+A data file's ID must correspond to the asset it configures, using the category's offset.
+
+For example:
+- Weapon ID 1001 is configured by data ID 8001.
+- Weapon ID 1002 is configured by data ID 8002.
+
+The relationship is:
+
+Data ID = 8000 + (Asset ID % 1000)
+
+Map Assets
+
+Map assets represent unique tile definitions rather than individual tile placements.
+
+Each unique tile requires only one asset entry, regardless of how many times it appears in a map.
+Multiple maps can reuse the same tile assets.
+Tile configuration data is only necessary for tiles that require additional properties.
+The map layout file is expected at the maximum map asset ID (2999).
+ID 2999 is reserved for the map layout and cannot be assigned to a regular map tile.
+
+The map layout stores tile IDs in a grid, referencing the corresponding unique tile assets.
