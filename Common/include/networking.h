@@ -60,11 +60,15 @@ Any violation of the Non-Commercial Restriction, Mod Requirements, or attributio
 #ifndef MEME_MAYHEM_COMMON_NETWORKING_H
 #define MEME_MAYHEM_COMMON_NETWORKING_H
 
-#include "../../Libs/enet/include/enet/enet.h"
+#include "enet/enet.h"
 #include <stdint.h>
 #include <stdbool.h>
 
 #define ENET_MODE_SERVER ENET_HOST_ANY
+
+#define NETWORKING_MAX_PACKET_DATA_SIZE UINT32_MAX
+
+#define NETWORKING_MAX_TEXT_LEN 255
 
 typedef enum message_type_t {
     // Connection
@@ -74,21 +78,17 @@ typedef enum message_type_t {
 
     // Asset synchronization
     MESSAGE_TYPE_CLIENT_REQUEST_ASSET_DOWNLOAD,
-    MESSAGE_TYPE_SERVER_ACK_ASSET_DOWNLOAD_REQUEST,
     MESSAGE_TYPE_SERVER_REJECT_ASSET_DOWNLOAD_REQUEST,
     MESSAGE_TYPE_SERVER_SEND_ASSET_DATA,
-    MESSAGE_TYPE_CLIENT_ACK_ASSET_DOWNLOAD,
-    MESSAGE_TYPE_CLIENT_REJECT_ASSET_DOWNLOAD,
 
-    // Lobby
-    MESSAGE_TYPE_CLIENT_REQUEST_JOIN_LOBBY,
-    MESSAGE_TYPE_SERVER_ACK_JOIN_LOBBY,
-    MESSAGE_TYPE_SERVER_REJECT_JOIN_LOBBY,
+    // Player Notifications
     MESSAGE_TYPE_SERVER_PLAYER_JOINED,
     MESSAGE_TYPE_SERVER_PLAYER_LEFT,
 
     // Gameplay
     MESSAGE_TYPE_CLIENT_SEND_INPUT,
+    MESSAGE_TYPE_CLIENT_SEND_ACTION_REQUEST,
+    MESSAGE_TYPE_SERVER_AUTHORIZE_ACTION,
     MESSAGE_TYPE_SERVER_SEND_GAME_STATE,
     MESSAGE_TYPE_SERVER_SEND_GAME_EVENT,
 
@@ -98,5 +98,47 @@ typedef enum message_type_t {
 
     MESSAGE_TYPE_COUNT
 } message_type;
+
+typedef struct {
+    uint32_t version_number;
+    uint8_t is_source_modded;
+} ClientAskConnectData;
+
+#define NETWORKING_YES UINT8_MAX
+#define NETWORKING_NO  0
+
+typedef struct {
+    uint32_t version_number;
+    uint8_t is_source_modded;
+    char reason[NETWORKING_MAX_TEXT_LEN];
+} ServerRejectConnectData;
+
+typedef struct {
+    char reason[NETWORKING_MAX_TEXT_LEN];
+} ServerRejectAssetDownloadRequestData;
+
+typedef struct {
+    uint32_t manifest_size;
+    uint32_t archive_size;
+    uint8_t data[];
+} ServerSendAssetDataData;
+
+typedef struct {
+    uint32_t length;
+    char name[];
+} ServerPlayerJoinedData;
+
+typedef struct {
+    uint32_t length;
+    char name[];
+} ServerPlayerLeftData;
+
+// TODO(A-Boring-Square): Gameplay and Disconect packets
+
+typedef struct {
+    uint32_t type;
+    uint32_t size;
+    uint8_t data[];
+} SerializedPacket;
 
 #endif // MEME_MAYHEM_COMMON_NETWORKING_H
