@@ -15,3 +15,4 @@ id,path,type
 1004,Images/Weapons/THE_MOTHERS_ROLLING_PIN.png,TEXTURE
 4000,Fonts/Open_Sans/OpenSans-Bold.ttf,FONT
 4001,Fonts/Open_Sans/OpenSans-Regular.ttf,FONT
+5000,Sound/Misc/mossey_scream.mp3,SOUND

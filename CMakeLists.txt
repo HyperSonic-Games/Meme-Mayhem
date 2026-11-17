@@ -107,6 +107,7 @@ endif()
 
 add_library(Common STATIC
     Common/src/asset_system.c
+    Common/src/localized_text.c
 )
 
 target_include_directories(Common PUBLIC
