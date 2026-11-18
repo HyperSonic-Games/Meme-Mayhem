@@ -7,3 +7,6 @@
 [submodule "Libs/miniz"]
 	path = Libs/miniz
 	url = https://github.com/richgel999/miniz
+[submodule "Libs/cclass"]
+	path = Libs/cclass
+	url = https://github.com/A-Boring-Square/cclass
