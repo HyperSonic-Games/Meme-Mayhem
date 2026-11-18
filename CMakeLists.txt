@@ -113,6 +113,7 @@ add_library(Common STATIC
 target_include_directories(Common PUBLIC
     Common/include
     Libs
+    Libs/cclass
 )
 
 target_link_libraries(Common PUBLIC
@@ -123,16 +124,20 @@ target_link_libraries(Common PUBLIC
 if(MM_BUILD_CLIENT)
     add_executable(Client
         Client/src/main.c
+        Client/src/scene_manager.c
     )
 
     target_include_directories(Client PRIVATE
         Client/include
         Libs
+        Libs/cclass
     )
 
     target_link_libraries(Client PRIVATE
         Common
         raylib
+        miniz
+        enet
     )
 
     target_compile_definitions(Client PRIVATE
@@ -152,6 +157,7 @@ if(MM_BUILD_SERVER)
     target_include_directories(Server PRIVATE
         Server/include
         Libs
+        Libs/cclass
     )
 
     target_link_libraries(Server PRIVATE
