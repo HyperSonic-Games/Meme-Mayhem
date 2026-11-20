@@ -148,6 +148,8 @@ CLASS(SceneManager) {
     METHOD_PTR(SceneManager, bool, AddScene, Scene scene, const char* scene_id);
     /*
     removes a scene using it's id and calls it's shutdown function
+    if the active scene is removed, the manager will have
+    no active scene afterward
     returns false on failure
     otherwise returns true
     */

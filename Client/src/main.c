@@ -57,6 +57,7 @@ The Software is provided “AS IS”, without warranty of any kind, express or i
 8. Termination
 Any violation of the Non-Commercial Restriction, Mod Requirements, or attribution requirements automatically terminates this license.
 */
+
 #include "raylib_includes.h"
 
 int main() {

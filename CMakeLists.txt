@@ -122,25 +122,26 @@ target_link_libraries(Common PUBLIC
 )
 
 if(MM_BUILD_CLIENT)
-    add_executable(Client
+    add_executable(MMClient
         Client/src/main.c
         Client/src/scene_manager.c
+        Client/src/main_menu.c
     )
 
-    target_include_directories(Client PRIVATE
+    target_include_directories(MMClient PRIVATE
         Client/include
         Libs
         Libs/cclass
     )
 
-    target_link_libraries(Client PRIVATE
+    target_link_libraries(MMClient PRIVATE
         Common
         raylib
         miniz
         enet
     )
 
-    target_compile_definitions(Client PRIVATE
+    target_compile_definitions(MMClient PRIVATE
         MM_CLIENT
     )
 endif()
@@ -150,21 +151,21 @@ endif()
 # ============================================================
 
 if(MM_BUILD_SERVER)
-    add_executable(Server
+    add_executable(MMServer
         Server/src/main.c
     )
 
-    target_include_directories(Server PRIVATE
+    target_include_directories(MMServer PRIVATE
         Server/include
         Libs
         Libs/cclass
     )
 
-    target_link_libraries(Server PRIVATE
+    target_link_libraries(MMServer PRIVATE
         Common
     )
 
-    target_compile_definitions(Server PRIVATE
+    target_compile_definitions(MMServer PRIVATE
         MM_SERVER
     )
 endif()
@@ -174,9 +175,9 @@ endif()
 # ============================================================
 
 if(MM_BUILD_CLIENT)
-    add_custom_command(TARGET Client POST_BUILD
+    add_custom_command(TARGET MMClient POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/Assets"
-            "$<TARGET_FILE_DIR:Client>/Assets"
+            "$<TARGET_FILE_DIR:MMClient>/Assets"
     )
 endif()

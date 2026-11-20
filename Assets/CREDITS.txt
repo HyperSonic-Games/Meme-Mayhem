@@ -1,0 +1,35 @@
+Meme Mayhem Credits
+
+DEVELOPMENT
+Lead Developer: Lilly Yurchenko
+Assistant Developer: Everet Bradford
+
+PROGRAMMING & TECHNOLOGY
+raylib: Ramon Santamaria (@raysan5)
+ENet: Lee Salzman
+miniz: RAD Game Tools and Valve Software. Rich Geldreich and Tenacious Software LLC
+cclass: A-Boring-Square
+
+THIRD-PARTY ASSETS
+Open Sans Font: https://github.com/googlefonts/opensans
+
+GRAPHICS & ART
+Additional artists and asset contributors: To be announced
+
+MUSIC
+Music contributors and sources: To be announced
+
+SOUND EFFECTS
+Mostly Moosey: moosey_scream.mp3
+
+TESTING & FEEDBACK
+Playtesters and community feedback contributors: To be announced
+
+SPECIAL THANKS
+Our players: Thank you for playing Meme Mayhem!
+
+COMMUNITY
+Thank you to everyone who supported the development of Meme Mayhem
+
+OTHER ACKNOWLEDGEMENTS
+Additional acknowledgements will be added as the project grows

@@ -1,29 +1,29 @@
 Server Asset ID Ranges
 
 This system is primarily intended for people who want to mod the game or 
-otherwise modify its assets.
+otherwise modify its assets
 
-Each asset category has a reserved range of 1000 IDs.
+Each asset category has a reserved range of 1000 IDs
 
-0–999     - Player assets
-1000–1999 - Weapon assets
-2000–2999 - Map assets
-3000–3999 - Projectile assets
-4000–4999 - Fonts
-5000–5999 - Sounds
-6000–6999 - Music
-7000–7999 - UI assets
-8000–8999 - Other assets
+0-999     - Player assets
+1000-1999 - Weapon assets
+2000-2999 - Map assets
+3000-3999 - Projectile assets
+4000-4999 - Fonts
+5000-5999 - Sounds
+6000-6999 - Music
+7000-7999 - UI assets
+8000-8999 - Other assets
 
 Data Assets
 
-Data files are stored in the Other assets range (8000–8999).
+Data files are stored in the Other assets range (8000–8999)
 
-A data file's ID must correspond to the asset it configures, using the category's offset.
+A data file's ID must correspond to the asset it configures, using the category's offset
 
 For example:
-- Weapon ID 1001 is configured by data ID 8001.
-- Weapon ID 1002 is configured by data ID 8002.
+    Weapon ID 1001 is configured by data ID 8001
+    Weapon ID 1002 is configured by data ID 8002
 
 The relationship is:
 
@@ -31,12 +31,42 @@ Data ID = 8000 + (Asset ID % 1000)
 
 Map Assets
 
-Map assets represent unique tile definitions rather than individual tile placements.
+Map assets represent unique tile definitions rather than individual tile placements
 
-Each unique tile requires only one asset entry, regardless of how many times it appears in a map.
-Multiple maps can reuse the same tile assets.
-Tile configuration data is only necessary for tiles that require additional properties.
-The map layout file is expected at the maximum map asset ID (2999).
-ID 2999 is reserved for the map layout and cannot be assigned to a regular map tile.
+Each unique tile requires only one asset entry, regardless of how many times it appears in a map
+Multiple maps can reuse the same tile assets
+Tile configuration data is only necessary for tiles that require additional properties
+The map layout file is expected at the maximum map asset ID (2999)
+ID 2999 is reserved for the map layout and cannot be assigned to a regular map tile
 
-The map layout stores tile IDs in a grid, referencing the corresponding unique tile assets.
+The map layout stores tile IDs in a grid, referencing the corresponding unique tile assets
+
+Client Bootstrap claimed IDs
+
+the client needs a few files to bootstrap itself before it conects
+to the server and does this by using the local "Assets" folder for your server
+to acomplish this we expect some assets to be available
+under these IDs
+
+4000 - bold font
+4001 - regular font
+
+NOTE(A-Boring-Square) I have tried to make this is minamal as posible
+
+Other Files in the Assets Directory
+
+Not every file in the Assets directory belongs to the asset registry
+or server asset package
+
+some files are used directly by the client or server
+for miscellaneous purposes
+
+"id ranges.txt" - Documentation describing the reserved asset ID ranges 
+and their intended uses not loaded by the game (this file :3)
+
+"IconsAndLogos/" - Contains icons and logos used by the client and server,
+outside the regular asset registry
+
+"splash.txt" - Contains splash-screen text used by the client
+These files are handled separately from "manifest.csv" and the regular asset
+synchronization system
