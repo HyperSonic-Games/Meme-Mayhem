@@ -61,6 +61,9 @@ Any violation of the Non-Commercial Restriction, Mod Requirements, or attributio
 #include <stdint.h>
 #include <stdlib.h>
 
+// raygui impl
+#define RAYGUI_IMPLEMENTATION
+
 #include "raylib_includes.h"
 
 #include "main_menu.h"
@@ -84,6 +87,6 @@ Scene CreateMainMenuScene(void) {
     scene.init_scene = init_scene;
     scene.run_scene = NULL;
     scene.cleanup_scene = NULL;
-    
+
     return scene;
 }

@@ -114,7 +114,6 @@ target_include_directories(Common PUBLIC
     Common/include
     Libs
     Libs/cclass
-    Libs/raygui/src
 )
 
 target_link_libraries(Common PUBLIC
@@ -161,7 +160,6 @@ if(MM_BUILD_SERVER)
         Server/include
         Libs
         Libs/cclass
-        Libs/raygui/src
     )
 
     target_link_libraries(MMServer PRIVATE
