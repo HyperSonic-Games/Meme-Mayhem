@@ -10,3 +10,6 @@
 [submodule "Libs/cclass"]
 	path = Libs/cclass
 	url = https://github.com/A-Boring-Square/cclass
+[submodule "Libs/raygui"]
+	path = Libs/raygui
+	url = https://github.com/raysan5/raygui
