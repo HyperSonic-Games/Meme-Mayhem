@@ -67,10 +67,13 @@ Any violation of the Non-Commercial Restriction, Mod Requirements, or attributio
 
 #define RAYMATH_USE_SIMD_INTRINSICS 1
 
-#include "raylib/src/config.h"
-#include "raylib/src/raylib.h"
-#include "raylib/src/raymath.h"
-#include "raylib/src/rlgl.h"
+#include "config.h"
+#include "raylib.h"
+#include "raymath.h"
+#include "rlgl.h"
+
+#include "raygui.h"
+
 
 
 #endif // MEME_MAYHEM_LIBS_RAYLIB_INCLUDES_H

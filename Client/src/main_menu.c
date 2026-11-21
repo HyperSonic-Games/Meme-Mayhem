@@ -58,5 +58,32 @@ The Software is provided “AS IS”, without warranty of any kind, express or i
 Any violation of the Non-Commercial Restriction, Mod Requirements, or attribution requirements automatically terminates this license.
 */
 
-#include "main_menu.h"
+#include <stdint.h>
+#include <stdlib.h>
 
+#include "raylib_includes.h"
+
+#include "main_menu.h"
+#include "scene_manager.h"
+
+/*
+main menu scene init function
+*/
+bool init_scene(Scene *self) {
+    
+    return true;
+}
+
+bool run_scene(Scene *self) {
+    return true;
+}
+
+Scene CreateMainMenuScene(void) {
+    Scene scene;
+
+    scene.init_scene = init_scene;
+    scene.run_scene = NULL;
+    scene.cleanup_scene = NULL;
+    
+    return scene;
+}

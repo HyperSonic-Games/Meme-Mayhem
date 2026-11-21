@@ -6,6 +6,7 @@ Assistant Developer: Everet Bradford
 
 PROGRAMMING & TECHNOLOGY
 raylib: Ramon Santamaria (@raysan5)
+raygui:  Ramon Santamaria (@raysan5)
 ENet: Lee Salzman
 miniz: RAD Game Tools and Valve Software. Rich Geldreich and Tenacious Software LLC
 cclass: A-Boring-Square

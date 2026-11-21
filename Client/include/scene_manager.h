@@ -104,7 +104,7 @@ this is an internal struct
 typedef struct SceneEntry SceneEntry;
 
 /*
-Scene manager class
+scene manager class
 */
 CLASS(SceneManager) {
     /*
